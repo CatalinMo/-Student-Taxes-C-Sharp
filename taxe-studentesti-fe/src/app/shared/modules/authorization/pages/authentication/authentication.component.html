@@ -1,0 +1,37 @@
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 min-vh-100 d-flex flex-column justify-content-center">
+      <div class="row">
+        <div class="col-lg-6 col-md-8 mx-auto">
+          <div class="card rounded shadow shadow-sm">
+            <div class="card-header">
+              <h3 class="mb-0">Logare</h3>
+            </div>
+            <div class="card-body">
+              <form @submit.prevent="login" class="form" role="form" autocomplete="off" novalidate="">
+                <div class="form-group">
+                  <label for="email">Utilizator</label>
+                  <input type="text" class="form-control form-control-lg rounded-0" id="email" required="" v-model="username">
+                  <div class="invalid-feedback">Oops, you missed this one.</div>
+                </div>
+                <div class="form-group">
+                  <label>Parolă</label>
+                  <input type="password" class="form-control form-control-lg rounded-0" required="" autocomplete="new-password" v-model="password">
+                </div>
+                <div class="row margin-top-1" v-if="errorMessage">
+                  <div class="col">
+                    <p style="color: red">{{ errorMessage }}</p>
+                  </div>
+                </div>
+                <button style="margin-left: 1%" type="submit" class="btn btn-primary btn-lg float-right" @click="onLogin()">Logare</button>
+              </form>
+              <p>Pentru probleme tehnice contactați <strong>admintaxestudentesti@gmail.com</strong> (probleme asociate contului) sau <strong>biroutaxestudentesti@gmail.com</strong> (probleme asociate taxelor)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

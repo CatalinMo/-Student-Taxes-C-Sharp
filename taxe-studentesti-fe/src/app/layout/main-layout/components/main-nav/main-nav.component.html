@@ -1,0 +1,94 @@
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+  <div class="container-fluid">
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav">
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.STUDENT"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Studii active
+            <!-- <router-link to="/student/studii-active">Studii active</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.STUDENT"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Taxe active
+            <!-- <router-link to="/student/taxe-active">Taxe active</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.STUDENT"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Taxe plătite
+            <!-- <router-link to="/student/taxe-platite">Taxe plătite</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.TAX_OFFICE"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Studenți
+            <!-- <router-link to="/birou-taxe/studenti">Studenți</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.TAX_OFFICE"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Taxe limită
+            <!-- <router-link to="/birou-taxe/taxe-limita">Taxe limită</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.TAX_OFFICE"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Taxe restante
+            <!-- <router-link to="/birou-taxe/taxe-restante">Taxe restante</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.ADMIN"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Conturi
+            <!-- <router-link to="/administrator/conturi">Conturi</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item" [routerLinkActive]="'active'" *ngIf="user.role === userRole.ADMIN"> -->
+          <li class="nav-item">
+          <a class="nav-link">
+            Studii
+            <!-- <router-link to="/administrator/studii">Studii</router-link> -->
+          </a>
+        </li>
+        <!-- <li class="nav-item dropdown" [routerLinkActive]="'active'" *ngIf="user.role === userRole.ADMIN"> -->
+          <li nav-item dropdown>
+          <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Taxe</a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item">
+              Taxe studiu
+              <router-link to="/administrator/taxe-studiu">Taxe studiu</router-link>
+            </a>
+            <a class="dropdown-item">
+              Taxe cămin
+              <router-link to="/administrator/taxe-camin">Taxe cămin</router-link>
+            </a>
+            <a class="dropdown-item">
+              Alte taxe
+              <router-link to="/administrator/alte-taxe"> Alte taxe</router-link>
+            </a>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        <!-- <span style="margin-left: 5%;margin-right: 4%">{{ user.firstName }} {{ user.lastName }}</span> -->
+      </button>
+      <div class="dropdown-menu">
+        <!-- <a class="dropdown-item" [routerLink]="['/user/profil']">Profil</a>
+        <a class="dropdown-item" (click)="logout()">Delogare</a> -->
+      </div>
+    </div>
+  </div>
+</nav>
