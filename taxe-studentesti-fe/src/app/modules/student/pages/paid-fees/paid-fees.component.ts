@@ -7,15 +7,9 @@ import {UserViewModel} from "@/app/shared/modules/authorization/models/user.view
 import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
 import {AuthorizationServiceRepository} from "@/app/shared/modules/authorization/services/authorization/authorization.service.repository";
 import {AccountModel} from "@/app/shared/models/account.model";
-import {Options, Vue} from "vue-class-component";
+import {Vue} from "vue-class-component";
 import {inject} from "vue";
-import {BModal} from "bootstrap-vue-next";
 
-@Options({
-  components: {
-    'b-modal': BModal
-  },
-})
 export default class PaidFeesComponent extends Vue {
 
   filter = '';

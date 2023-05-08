@@ -1,17 +1,17 @@
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {ConfigurationService} from "../modules/configuration/services/configuration.service";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {StudyRequest} from "../models/request/study.request";
 import {StudyModel} from "../models/study.model";
 import {StudyAdapter} from "../model-adapter/study.adapter";
+import axios, {AxiosHeaders} from "axios/index";
 
 const httpOptions = {
-  headers: new HttpHeaders({'Content-Type': 'application/json'})
+  headers: new AxiosHeaders({
+    'Content-Type': 'application/json',
+  })
 };
 
-@Injectable()
 export class StudyServiceRepository {
 
   private configuration: any;
@@ -24,7 +24,6 @@ export class StudyServiceRepository {
   };
 
   constructor(
-    private http: HttpClient,
     private configurationService: ConfigurationService,
     private studyAdapter: StudyAdapter
   ) {
@@ -32,25 +31,25 @@ export class StudyServiceRepository {
   }
 
   createStudy(study: StudyRequest) {
-    return this.http.post(this.endpoints.createStudy(), study, httpOptions);
+    return axios.post(this.endpoints.createStudy(), study, httpOptions);
   }
 
   updateStudy(id: number, study: StudyRequest) {
-    return this.http.put(this.endpoints.updateStudy(id), study, httpOptions);
+    return axios.put(this.endpoints.updateStudy(id), study, httpOptions);
   }
 
   deleteStudy(id: number) {
-    return this.http.delete(this.endpoints.deleteStudy(id), httpOptions);
+    return axios.delete(this.endpoints.deleteStudy(id), httpOptions);
   }
 
   deleteActiveStudy(id: number) {
-    return this.http.delete(this.endpoints.deleteActiveStudy(id), httpOptions);
+    return axios.delete(this.endpoints.deleteActiveStudy(id), httpOptions);
   }
 
   getStudies(): Observable<Array<StudyModel>> {
-    return this.http.get(this.endpoints.getStudies(), httpOptions)
+    return from(axios.get(this.endpoints.getStudies(), httpOptions))
       .pipe(
-        map((response: Array<any>) =>
+        map((response: any) =>
           response.map((study: any) => {
             return this.studyAdapter.adapt(study);
           })

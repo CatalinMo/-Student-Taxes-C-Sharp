@@ -1,17 +1,17 @@
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Injectable} from "@angular/core";
 import {ConfigurationService} from "../modules/configuration/services/configuration.service";
 import {OtherFeeAdapter} from "../model-adapter/other-fee.adapter";
 import {OtherFeeRequest} from "../models/request/other-fee.request";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {OtherFeeModel} from "../models/other-fee.model";
+import axios, {AxiosHeaders} from "axios/index";
 
 const httpOptions = {
-  headers: new HttpHeaders({'Content-Type': 'application/json'})
+  headers: new AxiosHeaders({
+    'Content-Type': 'application/json',
+  })
 };
 
-@Injectable()
 export class OtherFeeServiceRepository {
 
   private configuration: any;
@@ -23,7 +23,6 @@ export class OtherFeeServiceRepository {
   };
 
   constructor(
-    private http: HttpClient,
     private configurationService: ConfigurationService,
     private otherFeeAdapter: OtherFeeAdapter
   ) {
@@ -31,21 +30,21 @@ export class OtherFeeServiceRepository {
   }
 
   createOtherFee(otherFeeRequest: OtherFeeRequest) {
-    return this.http.post(this.endpoints.createOtherFee(), otherFeeRequest, httpOptions);
+    return axios.post(this.endpoints.createOtherFee(), otherFeeRequest, httpOptions);
   }
 
   updateOtherFee(id: number, otherFeeRequest: OtherFeeRequest) {
-    return this.http.put(this.endpoints.updateOtherFee(id), otherFeeRequest, httpOptions);
+    return axios.put(this.endpoints.updateOtherFee(id), otherFeeRequest, httpOptions);
   }
 
   deleteOtherFee(id: number) {
-    return this.http.delete(this.endpoints.deleteOtherFee(id), httpOptions);
+    return axios.delete(this.endpoints.deleteOtherFee(id), httpOptions);
   }
 
   getOtherFees(): Observable<Array<OtherFeeModel>> {
-    return this.http.get(this.endpoints.getOtherFees(), httpOptions)
+    return from(axios.get(this.endpoints.getOtherFees(), httpOptions))
       .pipe(
-        map((response: Array<any>) =>
+        map((response: any) =>
           response.map((otherFee: any) => {
             return this.otherFeeAdapter.adapt(otherFee);
           })

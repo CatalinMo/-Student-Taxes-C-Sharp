@@ -1,17 +1,17 @@
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Injectable} from "@angular/core";
 import {ConfigurationService} from "../modules/configuration/services/configuration.service";
 import {HostelFeeAdapter} from "../model-adapter/hostel-fee.adapter";
 import {HostelFeeRequest} from "../models/request/hostel-fee.request";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {HostelFeeModel} from "../models/hostel-fee.model";
+import axios, {AxiosHeaders} from "axios/index";
 
 const httpOptions = {
-  headers: new HttpHeaders({'Content-Type': 'application/json'})
+  headers: new AxiosHeaders({
+    'Content-Type': 'application/json',
+  })
 };
 
-@Injectable()
 export class HostelFeeServiceRepository {
 
   private configuration: any;
@@ -23,7 +23,6 @@ export class HostelFeeServiceRepository {
   };
 
   constructor(
-    private http: HttpClient,
     private configurationService: ConfigurationService,
     private hostelFeeAdapter: HostelFeeAdapter
   ) {
@@ -31,21 +30,21 @@ export class HostelFeeServiceRepository {
   }
 
   createHostelFee(hostelFeeRequest: HostelFeeRequest) {
-    return this.http.post(this.endpoints.createHostelFee(), hostelFeeRequest, httpOptions);
+    return axios.post(this.endpoints.createHostelFee(), hostelFeeRequest, httpOptions);
   }
 
   updateHostelFee(id: number, hostelFeeRequest: HostelFeeRequest) {
-    return this.http.put(this.endpoints.updateHostelFee(id), hostelFeeRequest, httpOptions);
+    return axios.put(this.endpoints.updateHostelFee(id), hostelFeeRequest, httpOptions);
   }
 
   deleteHostelFee(id: number) {
-    return this.http.delete(this.endpoints.deleteHostelFee(id), httpOptions);
+    return axios.delete(this.endpoints.deleteHostelFee(id), httpOptions);
   }
 
   getHostelFees(): Observable<Array<HostelFeeModel>> {
-    return this.http.get(this.endpoints.getHostelFees(), httpOptions)
+    return from(axios.get(this.endpoints.getHostelFees(), httpOptions))
       .pipe(
-        map((response: Array<any>) =>
+        map((response: any) =>
           response.map((hostelFee: any) => {
             return this.hostelFeeAdapter.adapt(hostelFee);
           })
