@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router';
+import {NavigationGuardNext, RouteLocationNormalized, RouteRecordRaw} from 'vue-router';
 import MainContentComponent from '@/app/layout/main-layout/components/main-content/index.vue';
 
 // import { AuthGuard } from "./shared/modules/authorization/guards/auth/auth.guard";
@@ -13,20 +13,25 @@ import AuthorizationRoutes from '@/app/shared/modules/authorization/authorizatio
 // import ProfileRoutes from "@/app/modules/profile/profile-routing.module";
 // import TaxOfficeRoutes from "@/app/modules/tax-office/tax-office-routing.module";
 import StudentRoutes from "@/app/modules/student/student-routing.module";
+import {AuthGuard} from "@/app/shared/modules/authorization/guards/auth/auth.guard";
+import {
+    AuthorizationServiceRepository
+} from "@/app/shared/modules/authorization/services/authorization/authorization.service.repository";
+import {RolesGuard} from "@/app/shared/modules/authorization/guards/roles/roles.guard";
 
 export const PublicRoutes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: () => import('@/app/layout/main-layout/components/main-content/index.vue'),
-        // beforeEnter: AuthGuard,
+        beforeEnter: AuthGuard.beforeRouteEnter,
         children: [
             {
                 path: 'student',
                 children: StudentRoutes,
-                // beforeEnter: RolesGuard,
-                // meta: {
-                //     roles: [UserRole.STUDENT]
-                // }
+                beforeEnter: RolesGuard.beforeRouteEnter,
+                meta: {
+                    roles: [UserRole.STUDENT]
+                }
             },
             // {
             //     path: 'birou-taxe',

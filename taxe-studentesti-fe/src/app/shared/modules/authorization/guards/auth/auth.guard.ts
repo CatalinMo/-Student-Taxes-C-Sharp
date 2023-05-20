@@ -1,28 +1,14 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthorizationServiceRepository } from '../../services/authorization/authorization.service.repository';
+import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
+import {AuthorizationServiceRepository} from "@/app/shared/modules/authorization/services/authorization/authorization.service.repository";
 
-@Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
 
-    constructor(
-        private router: Router
-    ) {
+    static beforeRouteEnter(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
+        const currentToken = AuthorizationServiceRepository.getCurrentTokenValue();
+        if (currentToken) {
+            next();
+        } else {
+            next('/auth/login');
+        }
     }
-
-    canActivate(
-        route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot
-    ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      const currentToken = AuthorizationServiceRepository.getCurrentTokenValue();
-
-      if (currentToken) {
-        return true;
-      }
-
-        this.router.navigateByUrl('/auth/login');
-        return false;
-    }
-
 }

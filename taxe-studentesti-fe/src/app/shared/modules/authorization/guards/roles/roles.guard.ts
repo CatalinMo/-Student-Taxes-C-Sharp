@@ -1,22 +1,17 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { UserRole } from '../../enums/user-role';
-import {AuthorizationServiceRepository} from '../../services/authorization/authorization.service.repository';
+import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
+import {AuthorizationServiceRepository} from "@/app/shared/modules/authorization/services/authorization/authorization.service.repository";
+import {UserRole} from "@/app/shared/modules/authorization/enums/user-role";
 
-@Injectable()
-export class RolesGuard implements CanActivate {
+export class RolesGuard {
 
-  constructor() {
-  }
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-
-    return !!route.data.roles.find((role: UserRole) => role === AuthorizationServiceRepository.getCurrentUserValue().role);
-
+  static beforeRouteEnter(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
+    const currentUserRole = AuthorizationServiceRepository.getCurrentUserValue().role;
+    const requiredRoles: UserRole[] = to.meta.roles as UserRole[];
+    if (requiredRoles.includes(currentUserRole)) {
+      next();
+    } else {
+      console.log('%cAcces restricționat! Utilizatorul nu are drepturile necesare.', 'color: red;');
+      next(false);
     }
-
+  }
 }
