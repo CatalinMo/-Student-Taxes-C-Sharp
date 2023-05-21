@@ -8,6 +8,7 @@ import {ActiveFeeRequest} from "../models/request/active-fee.request";
 import {ActiveFeeModel} from "../models/active-fee.model";
 import {ActiveFeeAdapter} from "../model-adapter/active-fee.adapter";
 import axios, {AxiosHeaders} from "axios/index";
+import {AxiosResponse} from "axios";
 
 const httpOptions = {
   headers: new AxiosHeaders({
@@ -47,11 +48,11 @@ export class AccountServiceRepository {
 
   updateAccount(id: number, account: AccountRequest) {
     console.log(account);
-    return axios.put(this.endpoints.updateAccount(id), account, httpOptions);
+    return from(axios.put(this.endpoints.updateAccount(id), account, httpOptions));
   }
 
   updateActiveFee(id: number, activeFee: ActiveFeeRequest) {
-    return axios.put(this.endpoints.updateActiveFee(id), activeFee, httpOptions);
+    return from(axios.put(this.endpoints.updateActiveFee(id), activeFee, httpOptions));
   }
 
   assignFeeToAccounts(ids: Array<number>, activeFee: ActiveFeeRequest) {
@@ -59,7 +60,7 @@ export class AccountServiceRepository {
       ids: ids,
       activeFee: activeFee
     }
-    return axios.put(this.endpoints.assignFeeToAccounts(), requestData, httpOptions);
+    return from(axios.put(this.endpoints.assignFeeToAccounts(), requestData, httpOptions));
   }
 
   markFeeAsPaid(accountId: number, activeFeeId: number, accountRequest: AccountRequest) {
@@ -72,7 +73,7 @@ export class AccountServiceRepository {
   }
 
   changePassword(id: number, newPassword: string) {
-    return axios.put(this.endpoints.changePassword(id), newPassword, httpOptions);
+    return from(axios.put(this.endpoints.changePassword(id), newPassword, httpOptions));
   }
 
   deleteAccount(id: number) {
@@ -80,16 +81,16 @@ export class AccountServiceRepository {
   }
 
   deleteAccountActiveFee(id: number) {
-    return axios.delete(this.endpoints.deleteAccountActiveFee(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteAccountActiveFee(id), httpOptions));
   }
 
   getAccounts(): Observable<Array<AccountModel>> {
     return from(axios.get(this.endpoints.getAccounts(), httpOptions))
         .pipe(
-            map((response: any) =>
-                response.map((account: any) => {
-                  return this.accountAdapter.adapt(account.data);
-                })
+            map((response: AxiosResponse<any>) =>
+                response.data.map((account: any) =>
+                    this.accountAdapter.adapt(account)
+                )
             )
         );
   }
@@ -109,9 +110,9 @@ export class AccountServiceRepository {
   getActiveFees(): Observable<Array<ActiveFeeModel>> {
     return from(axios.get(this.endpoints.getActiveFees(), httpOptions))
         .pipe(
-            map((response: any) =>
-                response.map((account: any) => {
-                  return this.activeFeeAdapter.adapt(account.data);
+            map((response: AxiosResponse<any>) =>
+                response.data.map((account: any) => {
+                  return this.activeFeeAdapter.adapt(account);
                 })
             )
         );

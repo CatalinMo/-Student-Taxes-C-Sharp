@@ -1,59 +1,44 @@
-import {Component, OnInit, PipeTransform} from '@angular/core';
-import { Observable } from "rxjs";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import { DecimalPipe } from "@angular/common";
-import {combineLatest, map, startWith, switchMap} from "rxjs/operators";
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { HostelFeeModel } from "../../../../shared/models/hostel-fee.model";
-import {HostelFeeServiceRepository} from "../../../../shared/services/hostel-fee.service.repository";
-import {ActiveFeeRequest} from "../../../../shared/models/request/active-fee.request";
+import {combineLatest, Observable} from "rxjs";
+import {map} from "rxjs/operators";
+import { HostelFeeModel } from "@/app/shared/models/hostel-fee.model";
+import {HostelFeeServiceRepository} from "@/app/shared/services/hostel-fee.service.repository";
+import {ActiveFeeRequest} from "@/app/shared/models/request/active-fee.request";
 import {TaxOfficeService} from "../../service/tax-office.service";
-import {AccountServiceRepository} from "../../../../shared/services/account.service.repository";
+import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
+import {Vue} from "vue-class-component";
+import {inject} from "vue";
 
-@Component({
-  selector: 'app-assign-hostel-fees',
-  templateUrl: './assign-hostel-fees.component.html',
-  styleUrls: ['./assign-hostel-fees.component.scss']
-})
-export class AssignHostelFeesComponent implements OnInit {
+export default class AssignHostelFeesComponent extends Vue {
 
   initialHostelFees$: Observable<HostelFeeModel[]>;
-  hostelFeesFilteredByHostel$: Observable<HostelFeeModel[]>;
-  filteredHostelFees$: Observable<HostelFeeModel[]>;
-  filter = new FormControl('');
-  hostel = new FormControl('C1');
-  hostelFeeForm = new FormGroup({
-    limitDate: new FormControl('', Validators.required),
-    comment: new FormControl(''),
-    discount: new FormControl('', Validators.pattern('[0-9]+'))
-  });
+  hostelFeesFilteredByHostel: HostelFeeModel[] = [];
+  filteredHostelFees: HostelFeeModel[] = [];
+  showAssignHostelFeeModal = false;
+  filter = '';
+  hostel = 'C1';
+  hostelFeeForm = {
+    limitDate: '',
+    comment: '',
+    discount: ''
+  };
   selectedHostelFee: HostelFeeModel;
+  private accountServiceRepository: AccountServiceRepository = inject<AccountServiceRepository>('accountService');
+  private hostelFeeServiceRepository: HostelFeeServiceRepository = inject<HostelFeeServiceRepository>('hostelFeeService');
+  private taxOfficeService: TaxOfficeService = inject<TaxOfficeService>('taxOfficeService');
 
-  constructor(
-    private accountServiceRepository: AccountServiceRepository,
-    private hostelFeeServiceRepository: HostelFeeServiceRepository,
-    private taxOfficeService: TaxOfficeService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
+  created() {
     this.getHostelFees();
+    this.prepareInitialFilteredData();
     this.filterByHostel();
-    this.filterHostelFees(pipe);
+    this.filterHostelFees();
   }
 
-  ngOnInit(): void {}
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true}).result.then(() => {}, () => {this.hostelFeeForm.reset()});
-  }
-
-  assignHostelFeeToAccount(formValue) {
+  assignHostelFeeToAccount() {
     if (this.taxOfficeService.getAreMultipleAccounts()) {
-      this.assignFeeToMultipleAccounts(formValue);
+      this.assignFeeToMultipleAccounts();
     }
     else {
-      this.assignHostelFee(formValue);
+      this.assignHostelFee();
     }
   }
 
@@ -61,15 +46,23 @@ export class AssignHostelFeesComponent implements OnInit {
     this.selectedHostelFee = hostelFee;
   }
 
-  private assignFeeToMultipleAccounts(formValue) {
+  resetForms() {
+    this.hostelFeeForm = {
+      limitDate: '',
+      comment: '',
+      discount: ''
+    };
+  }
+
+  private assignFeeToMultipleAccounts() {
     const selectedIds = this.taxOfficeService.getSelectedIds();
-    const activeFee = this.convertToActiveFee(formValue);
+    const activeFee = this.convertToActiveFee();
     this.accountServiceRepository.assignFeeToAccounts(selectedIds, activeFee).subscribe();
     window.location.reload();
   }
 
-  private assignHostelFee(formValue) {
-    const activeFee = this.convertToActiveFee(formValue);
+  private assignHostelFee() {
+    const activeFee = this.convertToActiveFee();
     let selectedAccount = this.taxOfficeService.getAccountRequest();
     selectedAccount.activeFees.push(activeFee);
     this.accountServiceRepository.updateAccount(this.taxOfficeService.getAccountId(), selectedAccount).subscribe();
@@ -80,29 +73,37 @@ export class AssignHostelFeesComponent implements OnInit {
     this.initialHostelFees$ = this.hostelFeeServiceRepository.getHostelFees();
   }
 
+  private prepareInitialFilteredData() {
+    combineLatest([
+      this.searchByHostel(this.hostel)
+    ]).subscribe(([hostelFeesByHostel]) => {
+      this.hostelFeesFilteredByHostel = hostelFeesByHostel;
+      this.filteredHostelFees = this.search(this.filter, this.hostelFeesFilteredByHostel);
+    });
+  }
+
   private filterByHostel() {
-    this.hostelFeesFilteredByHostel$ = this.hostel.valueChanges.pipe(
-      startWith('C1'),
-      switchMap(text => this.searchByHostel(text))
-    );
+    this.$watch('hostel', (text: string) => {
+      this.searchByHostel(text).subscribe(result => {
+        this.hostelFeesFilteredByHostel = result;
+        this.filteredHostelFees = this.hostelFeesFilteredByHostel;
+      });
+    });
   }
 
-  private filterHostelFees(pipe: any) {
-    this.filteredHostelFees$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      combineLatest(this.hostelFeesFilteredByHostel$, (filterValue, items) => {
-        return this.search(filterValue, items, pipe);
-      })
-    );
+  private filterHostelFees() {
+    this.$watch('filter', (filterValue) => {
+      this.filteredHostelFees = this.search(filterValue, this.hostelFeesFilteredByHostel);
+    });
   }
 
-  private search(text: string, list: Array<HostelFeeModel>, pipe: PipeTransform): HostelFeeModel[] {
+  private search(text: string, list: Array<HostelFeeModel>): HostelFeeModel[] {
     return list.filter(fee => {
       const term = text.toLowerCase();
       return fee.name && fee.name.toLowerCase().includes(term)
         || fee.hostelName && fee.hostelName.toLowerCase().includes(term)
         || fee.type && fee.type.toLowerCase().includes(term)
-        || fee.value && pipe.transform(fee.value).includes(term);
+        || fee.value && this.formatValue(fee.value).includes(term);
     });
   }
 
@@ -114,14 +115,14 @@ export class AssignHostelFeesComponent implements OnInit {
     })));
   }
 
-  private convertToActiveFee(formValue): ActiveFeeRequest {
+  private convertToActiveFee(): ActiveFeeRequest {
     let newActiveFee = new ActiveFeeRequest();
     newActiveFee.name = this.selectedHostelFee.name;
     newActiveFee.details = this.selectedHostelFee.hostelName;
-    newActiveFee.comment = formValue.comment;
-    newActiveFee.limitDate = new Date(formValue.limitDate).getTime();
-    if (formValue.discount) {
-      const discount = Number(formValue.discount);
+    newActiveFee.comment = this.hostelFeeForm.comment;
+    newActiveFee.limitDate = new Date(this.hostelFeeForm.limitDate).getTime();
+    if (this.hostelFeeForm.discount) {
+      const discount = Number(this.hostelFeeForm.discount);
       const discountValue = discount / 100 * this.selectedHostelFee.value;
       newActiveFee.value = this.selectedHostelFee.value - discountValue;
     }
@@ -129,5 +130,9 @@ export class AssignHostelFeesComponent implements OnInit {
       newActiveFee.value = this.selectedHostelFee.value;
     }
     return newActiveFee;
+  }
+
+  private formatValue(year: number): string {
+    return year.toString();
   }
 }

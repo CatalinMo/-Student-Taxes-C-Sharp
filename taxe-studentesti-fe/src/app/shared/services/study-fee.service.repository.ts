@@ -5,6 +5,7 @@ import {StudyFeeAdapter} from "../model-adapter/study-fee.adapter";
 import {StudyFeeModel} from "../models/study-fee.model";
 import {StudyFeeRequest} from "../models/request/study-fee.request";
 import axios, {AxiosHeaders} from "axios/index";
+import {AxiosResponse} from "axios";
 
 const httpOptions = {
   headers: new AxiosHeaders({
@@ -39,8 +40,8 @@ export class StudyFeeServiceRepository {
   getStudyFees(): Observable<Array<StudyFeeModel>> {
     return from(axios.get(this.endpoints.getStudyFees(), httpOptions))
       .pipe(
-        map((response: any) =>
-          response.map((study: any) => {
+        map((response: AxiosResponse<any>) =>
+          response.data.map((study: any) => {
             return this.studyFeeAdapter.adapt(study);
           })
         )

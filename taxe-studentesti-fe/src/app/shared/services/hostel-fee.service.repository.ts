@@ -5,6 +5,7 @@ import {from, Observable} from "rxjs";
 import {map} from "rxjs/operators";
 import {HostelFeeModel} from "../models/hostel-fee.model";
 import axios, {AxiosHeaders} from "axios/index";
+import {AxiosResponse} from "axios";
 
 const httpOptions = {
   headers: new AxiosHeaders({
@@ -44,8 +45,8 @@ export class HostelFeeServiceRepository {
   getHostelFees(): Observable<Array<HostelFeeModel>> {
     return from(axios.get(this.endpoints.getHostelFees(), httpOptions))
       .pipe(
-        map((response: any) =>
-          response.map((hostelFee: any) => {
+        map((response: AxiosResponse<any>) =>
+          response.data.map((hostelFee: any) => {
             return this.hostelFeeAdapter.adapt(hostelFee);
           })
         )

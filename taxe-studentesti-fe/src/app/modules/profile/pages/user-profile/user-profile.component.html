@@ -1,23 +1,23 @@
 <div>
-  <ng-template #changePassword let-modal>
+  <b-modal id="changePassword" centered v-model="showChangePasswordModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-change-title">Schimbare parolă</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showChangePasswordModal = false; resetForms()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
-      <form [formGroup]="accountForm">
+      <form checkPassword = "accountForm">
         <label style="margin-top: 2%">Parolă nouă<span style="color: red">*</span></label>
-        <input type="password" class="form-control" formControlName="newPassword" placeholder="Parolă nouă">
+        <input type="password" class="form-control" v-model="accountForm.newPassword" placeholder="Parolă nouă" required pattern="(?=\D*\d)(?=[^a-z]*[a-z])(?=[^A-Z]*[A-Z]).{8,30}">
         <label style="margin-top: 2%">Repetare parolă nouă<span style="color: red">*</span></label>
-        <input type="password" class="form-control" formControlName="secondNewPassword" placeholder="Repetare parolă nouă">
+        <input type="password" class="form-control" v-model="accountForm.secondNewPassword" placeholder="Repetare parolă nouă" required pattern="(?=\D*\d)(?=[^a-z]*[a-z])(?=[^A-Z]*[A-Z]).{8,30}">
       </form>
     </div>
     <div class="modal-footer">
-      <button [disabled]="accountForm.invalid" type="button" class="btn btn-outline-primary" (click)="modal.close(); changeAccountPassword(accountForm.value)">Salvare</button>
+      <button :disabled="!$refs.accountForm?.validate()" type="button" class="btn btn-outline-primary" @click="showChangePasswordModal = false; changeAccountPassword(); resetForms()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 </div>
 
 <div style="width: 40%; margin-top: 10%; margin-left: 30%">
@@ -53,7 +53,7 @@
               </div>
             </div>
           <div style="text-align: center; margin-top: 3%">
-            <button type="button" class="btn btn-primary" (click)="open(changePassword)">Schimbă parola</button>
+            <button type="button" class="btn btn-primary" @click="showChangePasswordModal = true">Schimbă parola</button>
           </div>
         </div>
       </div>

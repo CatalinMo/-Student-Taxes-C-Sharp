@@ -1,8 +1,6 @@
-import {Injectable} from "@angular/core";
-import {AccountModel} from "../../../shared/models/account.model";
-import {AccountRequest} from "../../../shared/models/request/account.request";
+import {AccountModel} from "@/app/shared/models/account.model";
+import {AccountRequest} from "@/app/shared/models/request/account.request";
 
-@Injectable()
 export class TaxOfficeService {
 
   accountRequest: AccountRequest;
@@ -10,9 +8,6 @@ export class TaxOfficeService {
   accountId: number;
   areMultiple: boolean;
   ids: Array<number> = [];
-
-  constructor() {
-  }
 
   setAccountRequest(account: AccountRequest) {
     this.accountRequest = account;

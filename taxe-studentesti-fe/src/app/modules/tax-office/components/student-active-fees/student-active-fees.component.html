@@ -1,14 +1,14 @@
 <div>
 <form>
   <div class="form-group form-inline">
-    Caută: <input class="form-control ml-2" type="text" [formControl]="filter"/>
+    Caută: <input class="form-control ml-2" type="text" v-model="filter"/>
   </div>
 </form>
 
-  <ng-template #markAsPaid let-modal>
+  <b-modal id="mark-as-paid" centered v-model="showMarkAsPaiModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-paid-title">Marchează taxa ca fiind plătită</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <h4 class="modal-title" id="modal-mark-as-paid-title">Marchează taxa ca fiind plătită</h4>
+      <button type="button" class="close" aria-label="Close" @click="showMarkAsPaiModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
@@ -17,15 +17,15 @@
       <p><span class="text-danger">Această operațiune nu poate fi anulată.</span></p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Anulare</button>
-      <button type="button" ngbAutofocus class="btn btn-danger" (click)="modal.close(); markFeeAsPaid()">Da</button>
+      <button type="button" class="btn btn-outline-secondary" @click="showMarkAsPaiModal = false">Anulare</button>
+      <button type="button" autofocus class="btn btn-danger" @click="showMarkAsPaiModal = false; markFeeAsPaid()">Da</button>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #deleteFee let-modal>
+  <b-modal id="delete-fee" centered v-model="showDeleteFeeModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-delete-title">Ștergere Taxă</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <h4 class="modal-title" id="modal-delete-fee-title">Ștergere Taxă</h4>
+      <button type="button" class="close" aria-label="Close" @click="showDeleteFeeModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
@@ -35,10 +35,10 @@
         <span class="text-danger">Această operațiune nu poate fi anulată.</span></p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Anulare</button>
-      <button type="button" ngbAutofocus class="btn btn-danger" (click)="modal.close(); deleteAccountActiveFee()">Da</button>
+      <button type="button" class="btn btn-outline-secondary" @click="showDeleteFeeModal = false">Anulare</button>
+      <button type="button" autofocus class="btn btn-danger" @click="showDeleteFeeModal = false; deleteAccountActiveFee()">Da</button>
     </div>
-  </ng-template>
+  </b-modal>
 
   <div class="table-wrapper-scroll-y my-custom-scrollbar">
 <table class="table table-striped">
@@ -53,7 +53,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let fee of activeFees$ | async">
+  <tr v-for="fee in activeFees">
     <td class="align-middle">{{fee.name}}</td>
     <td class="align-middle">{{fee.details}}</td>
     <td class="align-middle">{{fee.comment}}</td>
@@ -65,8 +65,8 @@
           <i class="fa fa-ellipsis-h" style="color: dodgerblue"></i>
         </button>
         <div class="dropdown-menu">
-          <a class="dropdown-item" (click)="open(markAsPaid); setSelectedActiveFee(fee)">Marchează ca plătită</a>
-          <a class="dropdown-item" (click)="open(deleteFee); setId(fee.id)">Șterge</a>
+          <a class="dropdown-item" @click="showMarkAsPaiModal = true; setSelectedActiveFee(fee)">Marchează ca plătită</a>
+          <a class="dropdown-item" @click="showDeleteFeeModal = true; setId(fee.id)">Șterge</a>
         </div>
       </div>
     </td>

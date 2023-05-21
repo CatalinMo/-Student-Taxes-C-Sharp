@@ -1,43 +1,43 @@
 <div class="center-table">
 <form style="margin-top: 1%; margin-left: 1%">
   <div class="form-group form-inline">
-    Caută: <input class="form-control ml-2" type="text" [formControl]="filter"/>
+    Caută: <input class="form-control ml-2" type="text" v-model="filter"/>
   </div>
 </form>
 
-  <ng-template #studentContact let-modal>
+  <b-modal id="student-contact" centered v-model="showStudentContactModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-contact-title">Date Contact</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showStudentContactModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" v-if="selectedActiveFee.account">
       <p>Email: {{selectedActiveFee.account.email}}</p>
       <p>Telefon: {{selectedActiveFee.account.phone}}</p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-primary" (click)="modal.close()">Închidere</button>
+      <button type="button" class="btn btn-outline-primary" @click="showStudentContactModal = false">Închidere</button>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #addComment let-modal>
+  <b-modal id="add-comment" centered v-model="showAddCommentModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-comment-title">Comentariu</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showAddCommentModal = false; resetForm()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
       <form>
         <label>Comentariu</label>
-        <textarea class="form-control" placeholder="Comentariu" [formControl]="comment"></textarea>
+        <textarea class="form-control" placeholder="Comentariu" v-model="comment"></textarea>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-primary" (click)="modal.close(); updateActiveFee(comment.value)">Salvare</button>
+      <button type="button" class="btn btn-outline-primary" @click="showAddCommentModal = false; updateActiveFee(); resetForm()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 
 <table class="table table-striped">
   <thead>
@@ -54,7 +54,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let fee of filteredLimitFees$ | async">
+  <tr v-for="fee in filteredLimitFees">
     <td class="align-middle">{{fee.account.lastName}}</td>
     <td class="align-middle">{{fee.account.firstName}}</td>
     <td class="align-middle">{{fee.account.cnp}}</td>
@@ -69,8 +69,8 @@
           <i class="fa fa-ellipsis-h" style="color: dodgerblue"></i>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" (click)="open(studentContact); setSelectedActiveFee(fee)">Date contact</a>
-          <a class="dropdown-item" (click)="open(addComment); setSelectedActiveFee(fee); setForm(fee)">Comentariu</a>
+          <a class="dropdown-item" @click="showStudentContactModal = true; setSelectedActiveFee(fee)">Date contact</a>
+          <a class="dropdown-item" @click="showAddCommentModal = true; setSelectedActiveFee(fee); setForm(fee)">Comentariu</a>
         </div>
       </div>
     </td>

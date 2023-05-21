@@ -1,56 +1,40 @@
-import {Component, OnInit, PipeTransform} from '@angular/core';
 import { Observable } from "rxjs";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import { DecimalPipe } from "@angular/common";
-import {map, startWith, switchMap} from "rxjs/operators";
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { OtherFeeModel } from "../../../../shared/models/other-fee.model";
-import {OtherFeeServiceRepository} from "../../../../shared/services/other-fee.service.repository";
-import {AccountServiceRepository} from "../../../../shared/services/account.service.repository";
+import {map} from "rxjs/operators";
+import { OtherFeeModel } from "@/app/shared/models/other-fee.model";
+import {OtherFeeServiceRepository} from "@/app/shared/services/other-fee.service.repository";
+import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
 import {TaxOfficeService} from "../../service/tax-office.service";
-import {ActiveFeeRequest} from "../../../../shared/models/request/active-fee.request";
+import {ActiveFeeRequest} from "@/app/shared/models/request/active-fee.request";
+import {Vue} from "vue-class-component";
+import {inject} from "vue";
 
-@Component({
-  selector: 'app-assign-other-fees',
-  templateUrl: './assign-other-fees.component.html',
-  styleUrls: ['./assign-other-fees.component.scss']
-})
-export class AssignOtherFeesComponent implements OnInit {
+export default class AssignOtherFeesComponent extends Vue {
 
   initialOtherFees$: Observable<OtherFeeModel[]>;
-  filteredOtherFees$: Observable<OtherFeeModel[]>;
-  filter = new FormControl('');
-  otherFeeForm = new FormGroup({
-    limitDate: new FormControl('', Validators.required),
-    comment: new FormControl(''),
-    discount: new FormControl('', Validators.pattern('[0-9]+'))
-  });
+  filteredOtherFees: OtherFeeModel[] = [];
+  showAssignOtherFeeModal = false;
+  filter = '';
+  otherFeeForm = {
+    limitDate: '',
+    comment: '',
+    discount: ''
+  };
   selectedOtherFee: OtherFeeModel;
+  private accountServiceRepository: AccountServiceRepository = inject<AccountServiceRepository>('accountService');
+  private otherFeeServiceRepository: OtherFeeServiceRepository = inject<OtherFeeServiceRepository>('otherFeeService');
+  private taxOfficeService: TaxOfficeService = inject<TaxOfficeService>('taxOfficeService');
 
-  constructor(
-    private accountServiceRepository: AccountServiceRepository,
-    private otherFeeServiceRepository: OtherFeeServiceRepository,
-    private taxOfficeService: TaxOfficeService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
+  created() {
     this.getOtherFees();
-    this.filterOtherFees(pipe);
+    this.filterOtherFees();
   }
 
-  ngOnInit(): void {}
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true}).result.then(() => {}, () => {this.otherFeeForm.reset()});
-  }
-
-  assignOtherFeeToAccount(formValue) {
+  assignOtherFeeToAccount() {
     if (this.taxOfficeService.getAreMultipleAccounts()) {
-      this.assignFeeToMultipleAccounts(formValue);
+      this.assignFeeToMultipleAccounts();
     }
     else {
-      this.assignOtherFee(formValue);
+      this.assignOtherFee();
     }
   }
 
@@ -58,15 +42,23 @@ export class AssignOtherFeesComponent implements OnInit {
     this.selectedOtherFee = otherFee;
   }
 
-  private assignFeeToMultipleAccounts(formValue) {
+  resetForms() {
+    this.otherFeeForm = {
+      limitDate: '',
+      comment: '',
+      discount: ''
+    };
+  }
+
+  private assignFeeToMultipleAccounts() {
     const selectedIds = this.taxOfficeService.getSelectedIds();
-    const activeFee = this.convertToActiveFee(formValue);
+    const activeFee = this.convertToActiveFee();
     this.accountServiceRepository.assignFeeToAccounts(selectedIds, activeFee).subscribe();
     window.location.reload();
   }
 
-  private assignOtherFee(formValue) {
-    const activeFee = this.convertToActiveFee(formValue);
+  private assignOtherFee() {
+    const activeFee = this.convertToActiveFee();
     let selectedAccount = this.taxOfficeService.getAccountRequest();
     selectedAccount.activeFees.push(activeFee);
     this.accountServiceRepository.updateAccount(this.taxOfficeService.getAccountId(), selectedAccount).subscribe();
@@ -75,32 +67,32 @@ export class AssignOtherFeesComponent implements OnInit {
 
   private getOtherFees() {
     this.initialOtherFees$ = this.otherFeeServiceRepository.getOtherFees();
+    this.initialOtherFees$.subscribe(initialData => this.filteredOtherFees = initialData);
   }
 
-  private filterOtherFees(pipe: any) {
-    this.filteredOtherFees$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      switchMap(text => this.search(text, pipe))
-    );
+  private filterOtherFees() {
+    this.$watch('filter', (text: string) => {
+      this.search(text).subscribe(result => this.filteredOtherFees = result);
+    });
   }
 
-  private search(text: string, pipe: PipeTransform): Observable<OtherFeeModel[]> {
+  private search(text: string): Observable<OtherFeeModel[]> {
     return this.initialOtherFees$.pipe(map(otherFee =>
       otherFee.filter(fee => {
       const term = text.toLowerCase();
       return fee.name.toLowerCase().includes(term)
         || fee.type.toLowerCase().includes(term)
-        || pipe.transform(fee.value).includes(term);
+        || this.formatValue(fee.value).includes(term);
     })));
   }
 
-  private convertToActiveFee(formValue): ActiveFeeRequest {
+  private convertToActiveFee(): ActiveFeeRequest {
     let newActiveFee = new ActiveFeeRequest();
     newActiveFee.name = this.selectedOtherFee.name;
-    newActiveFee.comment = formValue.comment;
-    newActiveFee.limitDate = new Date(formValue.limitDate).getTime();
-    if (formValue.discount) {
-      const discount = Number(formValue.discount);
+    newActiveFee.comment = this.otherFeeForm.comment;
+    newActiveFee.limitDate = new Date(this.otherFeeForm.limitDate).getTime();
+    if (this.otherFeeForm.discount) {
+      const discount = Number(this.otherFeeForm.discount);
       const discountValue = discount / 100 * this.selectedOtherFee.value;
       newActiveFee.value = this.selectedOtherFee.value - discountValue;
     }
@@ -108,5 +100,9 @@ export class AssignOtherFeesComponent implements OnInit {
       newActiveFee.value = this.selectedOtherFee.value;
     }
     return newActiveFee;
+  }
+
+  private formatValue(year: number): string {
+    return year.toString();
   }
 }

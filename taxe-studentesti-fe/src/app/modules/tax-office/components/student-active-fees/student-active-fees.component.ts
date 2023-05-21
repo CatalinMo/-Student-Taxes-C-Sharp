@@ -1,40 +1,24 @@
-import {Component, OnInit, PipeTransform} from '@angular/core';
-import {Observable} from "rxjs";
-import {FormControl} from "@angular/forms";
-import {DecimalPipe} from "@angular/common";
-import {map, startWith} from "rxjs/operators";
-import {ActiveFeeModel} from "../../../../shared/models/active-fee.model";
+import {ActiveFeeModel} from "@/app/shared/models/active-fee.model";
 import {TaxOfficeService} from "../../service/tax-office.service";
-import {AccountServiceRepository} from "../../../../shared/services/account.service.repository";
-import {PaidFeeRequest} from "../../../../shared/models/request/paid-fee.request";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
+import {PaidFeeRequest} from "@/app/shared/models/request/paid-fee.request";
+import {Vue} from "vue-class-component";
+import {inject} from "vue";
 
-@Component({
-  selector: 'app-active-fees',
-  templateUrl: './student-active-fees.component.html',
-  styleUrls: ['./student-active-fees.component.scss']
-})
-export class StudentActiveFeesComponent implements OnInit {
+export default class StudentActiveFeesComponent extends Vue {
 
-  activeFees$: Observable<ActiveFeeModel[]>;
-  filter = new FormControl('');
+  activeFees: ActiveFeeModel[] = [];
+  showMarkAsPaiModal = false;
+  showDeleteFeeModal = false;
+  filter = '';
   id: number;
   selectedActiveFee: ActiveFeeModel;
+  private accountServiceRepository: AccountServiceRepository = inject<AccountServiceRepository>('accountService');
+  private taxOfficeService: TaxOfficeService = inject<TaxOfficeService>('taxOfficeService');
 
-  constructor(
-    private accountServiceRepository: AccountServiceRepository,
-    private taxOfficeService: TaxOfficeService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
-    this.filterActiveFees(pipe);
-  }
-
-  ngOnInit(): void {}
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true}).result.then(() => {}, () => {});
+  created() {
+    this.activeFees = this.taxOfficeService.account.activeFees;
+    this.filterActiveFees();
   }
 
   getDate(timestamp: number): string {
@@ -65,21 +49,20 @@ export class StudentActiveFeesComponent implements OnInit {
     this.selectedActiveFee = activeFee;
   }
 
-  private filterActiveFees(pipe: any) {
-    this.activeFees$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      map(text => this.search(text, pipe))
-    );
+  private filterActiveFees() {
+    this.$watch('filter', (text: string) => {
+      this.activeFees = this.search(text);
+    });
   }
 
-  private search(text: string, pipe: PipeTransform): ActiveFeeModel[] {
+  private search(text: string): ActiveFeeModel[] {
     return this.taxOfficeService.account.activeFees.filter(fee => {
       const term = text.toLowerCase();
       return fee.name && fee.name.toLowerCase().includes(term)
         || fee.details && fee.details.toLowerCase().includes(term)
         || fee.comment && fee.comment.toLowerCase().includes(term)
         || fee.limitDate && this.getDate(fee.limitDate).toLowerCase().includes(term)
-        || fee.value && pipe.transform(fee.value).includes(term);
+        || fee.value && this.formatValue(fee.value).includes(term);
     });
   }
 
@@ -91,5 +74,9 @@ export class StudentActiveFeesComponent implements OnInit {
     newPaidFee.dateOfPayment = new Date().getTime();
     newPaidFee.value = this.selectedActiveFee.value;
     return newPaidFee;
+  }
+
+  private formatValue(year: number): string {
+    return year.toString();
   }
 }

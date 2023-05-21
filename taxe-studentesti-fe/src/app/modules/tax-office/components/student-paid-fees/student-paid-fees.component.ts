@@ -1,42 +1,24 @@
-import { Component, OnInit, PipeTransform } from '@angular/core';
-import { Observable } from "rxjs";
-import { FormControl } from "@angular/forms";
-import { DecimalPipe } from "@angular/common";
-import { map, startWith } from "rxjs/operators";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import html2canvas from 'html2canvas';
 import jspdf from "jspdf";
-import { PaidFeeModel } from "../../../../shared/models/paid-fee.model";
+import { PaidFeeModel } from "@/app/shared/models/paid-fee.model";
 import {TaxOfficeService} from "../../service/tax-office.service";
-import {AccountModel} from "../../../../shared/models/account.model";
+import {AccountModel} from "@/app/shared/models/account.model";
+import {Vue} from "vue-class-component";
+import {inject} from "vue";
 
-@Component({
-  selector: 'app-paid-fees',
-  templateUrl: './student-paid-fees.component.html',
-  styleUrls: ['./student-paid-fees.component.scss']
-})
-export class StudentPaidFeesComponent implements OnInit {
+export default class StudentPaidFeesComponent extends Vue {
 
-  paidFees$: Observable<PaidFeeModel[]>;
-  filter = new FormControl('');
+  paidFees: PaidFeeModel[] = [];
+  showBillModal = false;
+  filter = '';
   selectedAccount: AccountModel;
-  selectedPaidFee: PaidFeeModel;
+  selectedPaidFee: PaidFeeModel = new PaidFeeModel();
+  private taxOfficeService: TaxOfficeService = inject<TaxOfficeService>('taxOfficeService');
 
-  constructor(
-    private taxOfficeService: TaxOfficeService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
-    this.filterPaidFees(pipe);
-  }
-
-  ngOnInit() {
+  created() {
     this.selectedAccount = this.taxOfficeService.getAccount();
-  }
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true, size: "xl"}).result.then(() => {}, () => {});
+    this.paidFees = this.selectedAccount.paidFees;
+    this.filterPaidFees();
   }
 
   getDate(timestamp: number): string {
@@ -48,21 +30,20 @@ export class StudentPaidFeesComponent implements OnInit {
     this.selectedPaidFee = paidFee;
   }
 
-  private filterPaidFees(pipe: any) {
-    this.paidFees$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      map(text => this.search(text, pipe))
-    );
+  private filterPaidFees() {
+    this.$watch('filter', (text: string) => {
+      this.paidFees = this.search(text);
+    });
   }
 
-  private search(text: string, pipe: PipeTransform): PaidFeeModel[] {
+  private search(text: string): PaidFeeModel[] {
     return this.selectedAccount.paidFees.filter(fee => {
       const term = text.toLowerCase();
       return fee.name && fee.name.toLowerCase().includes(term)
         || fee.details && fee.details.toLowerCase().includes(term)
         || fee.comment && fee.comment.toLowerCase().includes(term)
         || fee.dateOfPayment && this.getDate(fee.dateOfPayment).toLowerCase().includes(term)
-        || fee.value && pipe.transform(fee.value).includes(term);
+        || fee.value && this.formatValue(fee.value).includes(term);
     });
   }
 
@@ -80,5 +61,9 @@ export class StudentPaidFeesComponent implements OnInit {
         pdf.save('Chitanta.pdf');
       });
     }
+  }
+
+  private formatValue(year: number): string {
+    return year.toString();
   }
 }

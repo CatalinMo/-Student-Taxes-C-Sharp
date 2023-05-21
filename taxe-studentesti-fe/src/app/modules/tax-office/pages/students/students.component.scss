@@ -1,21 +1,21 @@
-table{
+.students-table table {
   table-layout: fixed;
   word-wrap: break-word;
 }
 
-th:not(:first-child) {
+.students-table th:not(:first-child) {
   text-align: center;
 }
 
-td:not(:first-child) {
+.students-table td:not(:first-child) {
   text-align: center;
 }
 
-th:first-child {
+.students-table th:first-child {
   width: 1%;
 }
 
-td:first-child {
+.students-table td:first-child {
   width: 1%;
 }
 

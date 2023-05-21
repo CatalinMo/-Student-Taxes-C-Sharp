@@ -1,59 +1,44 @@
-import {Component, OnInit, PipeTransform} from '@angular/core';
-import {Observable} from "rxjs";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {DecimalPipe} from "@angular/common";
-import {combineLatest, map, startWith, switchMap} from "rxjs/operators";
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {StudyFeeModel} from "../../../../shared/models/study-fee.model";
-import {StudyFeeServiceRepository} from "../../../../shared/services/study-fee.service.repository";
+import {Observable, combineLatest} from "rxjs";
+import {map} from "rxjs/operators";
+import {StudyFeeModel} from "@/app/shared/models/study-fee.model";
+import {StudyFeeServiceRepository} from "@/app/shared/services/study-fee.service.repository";
 import {TaxOfficeService} from "../../service/tax-office.service";
-import {ActiveFeeRequest} from "../../../../shared/models/request/active-fee.request";
-import {AccountServiceRepository} from "../../../../shared/services/account.service.repository";
+import {ActiveFeeRequest} from "@/app/shared/models/request/active-fee.request";
+import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
+import {inject} from "vue";
+import {Vue} from "vue-class-component";
 
-@Component({
-  selector: 'app-assign-study-fees',
-  templateUrl: './assign-study-fees.component.html',
-  styleUrls: ['./assign-study-fees.component.scss']
-})
-export class AssignStudyFeesComponent implements OnInit {
+export default class AssignStudyFeesComponent extends Vue {
 
   initialStudyFees$: Observable<StudyFeeModel[]>;
-  studyFeesFilteredByCycle$: Observable<StudyFeeModel[]>;
-  filteredStudyFees$: Observable<StudyFeeModel[]>;
-  filter = new FormControl('');
-  cycle = new FormControl('licenta');
-  studyFeeForm = new FormGroup({
-    limitDate: new FormControl('', Validators.required),
-    comment: new FormControl(''),
-    discount: new FormControl('', Validators.pattern('[0-9]+'))
-  });
+  studyFeesFilteredByCycle: StudyFeeModel[] = [];
+  filteredStudyFees: StudyFeeModel[] = [];
+  showAssignStudyFeeModal = false;
+  filter ='';
+  cycle = 'licenta';
+  studyFeeForm = {
+      limitDate: '',
+      comment: '',
+      discount: ''
+  };
   selectedStudyFee: StudyFeeModel;
+    private accountServiceRepository: AccountServiceRepository = inject<AccountServiceRepository>('accountService');
+    private studyFeeServiceRepository: StudyFeeServiceRepository = inject<StudyFeeServiceRepository>('studyFeeService');
+    private taxOfficeService: TaxOfficeService = inject<TaxOfficeService>('taxOfficeService');
 
-  constructor(
-    private accountServiceRepository: AccountServiceRepository,
-    private studyFeeServiceRepository: StudyFeeServiceRepository,
-    private taxOfficeService: TaxOfficeService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
+  created() {
     this.getStudyFees();
+    this.prepareInitialFilteredData();
     this.filterByCycle();
-    this.filterStudyFees(pipe);
+    this.filterStudyFees();
   }
 
-  ngOnInit(): void {}
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true}).result.then(() => {}, () => {this.studyFeeForm.reset()});
-  }
-
- assignStudyFeeToAccount(formValue) {
+ assignStudyFeeToAccount() {
     if (this.taxOfficeService.getAreMultipleAccounts()) {
-      this.assignFeeToMultipleAccounts(formValue);
+      this.assignFeeToMultipleAccounts();
     }
     else {
-      this.assignStudyFee(formValue);
+      this.assignStudyFee();
     }
   }
 
@@ -61,15 +46,23 @@ export class AssignStudyFeesComponent implements OnInit {
     this.selectedStudyFee = studyFee;
   }
 
-  private assignFeeToMultipleAccounts(formValue) {
+  resetForms() {
+    this.studyFeeForm = {
+        limitDate: '',
+        comment: '',
+        discount: ''
+    };
+  }
+
+  private assignFeeToMultipleAccounts() {
     const selectedIds = this.taxOfficeService.getSelectedIds();
-    const activeFee = this.convertToActiveFee(formValue);
+    const activeFee = this.convertToActiveFee();
     this.accountServiceRepository.assignFeeToAccounts(selectedIds, activeFee).subscribe();
     window.location.reload();
   }
 
-  private assignStudyFee(formValue) {
-    const activeFee = this.convertToActiveFee(formValue);
+  private assignStudyFee() {
+    const activeFee = this.convertToActiveFee();
     let selectedAccount = this.taxOfficeService.getAccountRequest();
     selectedAccount.activeFees.push(activeFee);
     this.accountServiceRepository.updateAccount(this.taxOfficeService.getAccountId(), selectedAccount).subscribe();
@@ -80,30 +73,38 @@ export class AssignStudyFeesComponent implements OnInit {
     this.initialStudyFees$ = this.studyFeeServiceRepository.getStudyFees();
   }
 
+    private prepareInitialFilteredData() {
+        combineLatest([
+            this.searchByCycle(this.cycle)
+        ]).subscribe(([studyFeesByCycle]) => {
+            this.studyFeesFilteredByCycle = studyFeesByCycle;
+            this.filteredStudyFees = this.search(this.filter, this.studyFeesFilteredByCycle);
+        });
+    }
+
   private filterByCycle() {
-    this.studyFeesFilteredByCycle$ = this.cycle.valueChanges.pipe(
-      startWith('licenta'),
-      switchMap(text => this.searchByCycle(text))
-    );
+    this.$watch('cycle', (text: string) => {
+        this.searchByCycle(text).subscribe(result => {
+            this.studyFeesFilteredByCycle = result;
+            this.filteredStudyFees = this.studyFeesFilteredByCycle;
+        });
+    });
   }
 
-  private filterStudyFees(pipe: any) {
-    this.filteredStudyFees$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      combineLatest(this.studyFeesFilteredByCycle$, (filterValue, items) => {
-        return this.search(filterValue, items, pipe);
-      })
-    );
+  private filterStudyFees() {
+    this.$watch('filter', (filterValue) => {
+        this.filteredStudyFees = this.search(filterValue, this.studyFeesFilteredByCycle);
+    });
   }
 
-  private search(text: string, list: Array<StudyFeeModel>, pipe: PipeTransform): StudyFeeModel[] {
+  private search(text: string, list: Array<StudyFeeModel>): StudyFeeModel[] {
     return list.filter(fee => {
       const term = text.toLowerCase();
       return fee.name && fee.name.toLowerCase().includes(term)
         || fee.study.cycle && fee.study.cycle.toLowerCase().includes(term)
         || fee.study.abbreviation && fee.study.abbreviation.toLowerCase().includes(term)
         || fee.type && fee.type.toLowerCase().includes(term)
-        || fee.value && pipe.transform(fee.value).includes(term);
+        || fee.value && this.formatValue(fee.value).includes(term);
     });
   }
 
@@ -115,14 +116,14 @@ export class AssignStudyFeesComponent implements OnInit {
     })));
   }
 
-  private convertToActiveFee(formValue): ActiveFeeRequest {
+  private convertToActiveFee(): ActiveFeeRequest {
     let newActiveFee = new ActiveFeeRequest();
     newActiveFee.name = this.selectedStudyFee.name;
     newActiveFee.details = this.selectedStudyFee.study.abbreviation;
-    newActiveFee.comment = formValue.comment;
-    newActiveFee.limitDate = new Date(formValue.limitDate).getTime();
-    if (formValue.discount) {
-      const discount = Number(formValue.discount);
+    newActiveFee.comment = this.studyFeeForm.comment;
+    newActiveFee.limitDate = new Date(this.studyFeeForm.limitDate).getTime();
+    if (this.studyFeeForm.discount) {
+      const discount = Number(this.studyFeeForm.discount);
       const discountValue = discount / 100 * this.selectedStudyFee.value;
       newActiveFee.value = this.selectedStudyFee.value - discountValue;
     }
@@ -130,5 +131,9 @@ export class AssignStudyFeesComponent implements OnInit {
       newActiveFee.value = this.selectedStudyFee.value;
     }
     return newActiveFee;
+  }
+
+  private formatValue(year: number): string {
+    return year.toString();
   }
 }

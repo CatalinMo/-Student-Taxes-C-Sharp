@@ -5,6 +5,7 @@ import {StudyRequest} from "../models/request/study.request";
 import {StudyModel} from "../models/study.model";
 import {StudyAdapter} from "../model-adapter/study.adapter";
 import axios, {AxiosHeaders} from "axios/index";
+import {AxiosResponse} from "axios";
 
 const httpOptions = {
   headers: new AxiosHeaders({
@@ -48,12 +49,12 @@ export class StudyServiceRepository {
 
   getStudies(): Observable<Array<StudyModel>> {
     return from(axios.get(this.endpoints.getStudies(), httpOptions))
-      .pipe(
-        map((response: any) =>
-          response.map((study: any) => {
-            return this.studyAdapter.adapt(study);
-          })
-        )
-      );
+        .pipe(
+            map((response: AxiosResponse<any>) =>
+                response.data.map((study: any) =>
+                    this.studyAdapter.adapt(study)
+                )
+            )
+        );
   }
 }

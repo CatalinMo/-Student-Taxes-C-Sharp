@@ -1,7 +1,7 @@
 <div>
 <form style="margin-top: 1%; margin-left: 1%">
   <div class="form-group form-inline">
-    Caută: <input class="form-control ml-2" type="text" [formControl]="filter"/>
+    Caută: <input class="form-control ml-2" type="text" v-model="filter"/>
   </div>
 </form>
 
@@ -21,7 +21,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let study of activeStudies$ | async">
+  <tr v-for="study in activeStudies">
     <td class="align-middle">{{study.faculty}}</td>
     <td class="align-middle">{{study.cycle}}</td>
     <td class="align-middle">{{study.department}}</td>
@@ -29,7 +29,7 @@
     <td class="align-middle">{{study.form}}</td>
     <td class="align-middle">{{study.year}}</td>
     <td class="align-middle">{{study.abbreviation}}</td>
-    <td class="align-middle"><i *ngIf="study.budget" class="fa fa-check"></i></td>
+    <td class="align-middle"><i v-if="study.budget" class="fa fa-check"></i></td>
     <td class="align-middle">{{study.accommodated}}</td>
   </tr>
   </tbody>
