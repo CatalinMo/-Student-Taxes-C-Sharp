@@ -3,14 +3,7 @@ import {AccountServiceRepository} from "@/app/shared/services/account.service.re
 import {AuthorizationServiceRepository} from "@/app/shared/modules/authorization/services/authorization/authorization.service.repository";
 import {AccountModel} from "@/app/shared/models/account.model";
 import {Vue} from "vue-class-component";
-import {defineRule} from "vee-validate";
 import {inject} from "vue";
-
-defineRule('checkPassword', (value: any) => {
-    const password = value.newPassword;
-    const confirmPassword = value.secondNewPassword;
-    return password === confirmPassword ? true : 'Parolele nu coincid';
-});
 
 export default class UserProfileComponent extends Vue {
 
@@ -39,6 +32,17 @@ export default class UserProfileComponent extends Vue {
   changeAccountPassword() {
     this.accountServiceRepository.changePassword(this.account.id, this.accountForm.newPassword).subscribe();
     window.location.reload();
+  }
+
+  areValidPasswords() {
+    const formReference = this.$refs.accountFormReference as HTMLFormElement;
+    return formReference?.checkValidity() && this.checkPasswords();
+  }
+
+  private checkPasswords() {
+    const password = this.accountForm.newPassword;
+    const confirmPassword = this.accountForm.secondNewPassword;
+    return password === confirmPassword;
   }
 
   private getAccount() {

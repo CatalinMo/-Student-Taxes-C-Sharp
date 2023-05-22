@@ -47,7 +47,6 @@ export class AccountServiceRepository {
   }
 
   updateAccount(id: number, account: AccountRequest) {
-    console.log(account);
     return from(axios.put(this.endpoints.updateAccount(id), account, httpOptions));
   }
 
@@ -73,7 +72,7 @@ export class AccountServiceRepository {
   }
 
   changePassword(id: number, newPassword: string) {
-    return from(axios.put(this.endpoints.changePassword(id), newPassword, httpOptions));
+    return from(axios.put(this.endpoints.changePassword(id), newPassword));
   }
 
   deleteAccount(id: number) {

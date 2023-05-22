@@ -30,7 +30,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <form>
+      <form ref="studyFeeFormReference">
           <label style="margin-top: 2%">Data limită<span style="color: red">*</span></label>
           <input type="date" class="form-control" v-model="studyFeeForm.limitDate" placeholder="Facultate" required>
           <label style="margin-top: 2%">Comentariu</label>
@@ -40,7 +40,7 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button :disabled="!$refs.studyFeeForm?.validate()" type="button" class="btn btn-outline-primary" @click="showAssignStudyFeeModal = false; assignStudyFeeToAccount(); resetForms()">Atribuie</button>
+      <button :disabled="!$refs.studyFeeFormReference?.checkValidity()" type="button" class="btn btn-outline-primary" @click="showAssignStudyFeeModal = false; assignStudyFeeToAccount(); resetForms()">Atribuie</button>
     </div>
   </b-modal>
 

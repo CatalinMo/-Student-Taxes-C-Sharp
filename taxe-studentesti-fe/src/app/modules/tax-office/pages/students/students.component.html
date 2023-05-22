@@ -86,7 +86,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <form>
+      <form ref="disciplineRecoveryFeesFormReference">
         <label>Nume Taxă<span style="color: red">*</span></label>
         <input class="form-control" v-model="disciplineRecoveryFeesForm.name" placeholder="Nume" required>
         <label>Disciplină<span style="color: red">*</span></label>
@@ -102,7 +102,7 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button :disabled="!$refs.disciplineRecoveryFeesForm?.validate()" type="button" class="btn btn-outline-primary" @click="showAssignDisciplineRecoveryFeeModal = false; assignDisciplineRecoveryFeeToAccount(); resetForms()">Atribuie</button>
+      <button :disabled="!$refs.disciplineRecoveryFeesFormReference?.checkValidity()" type="button" class="btn btn-outline-primary" @click="showAssignDisciplineRecoveryFeeModal = false; assignDisciplineRecoveryFeeToAccount(); resetForms()">Atribuie</button>
     </div>
   </b-modal>
 
@@ -114,7 +114,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <form>
+      <form ref="newFeesFormReference">
         <label style="margin-top: 2%">Denumire<span style="color: red">*</span></label>
         <input class="form-control" v-model="newFeesForm.name" placeholder="Taxa" required>
         <label style="margin-top: 2%">Valoare<span style="color: red">*</span></label>
@@ -126,7 +126,7 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button :disabled="!$refs.newFeesForm?.validate()" type="button" class="btn btn-outline-primary" @click="showAssignNewFeeModal = false; assignNewFeeToAccount(); resetForms()">Atribuie</button>
+      <button :disabled="!$refs.newFeesFormReference?.checkValidity()" type="button" class="btn btn-outline-primary" @click="showAssignNewFeeModal = false; assignNewFeeToAccount(); resetForms()">Atribuie</button>
     </div>
   </b-modal>
 

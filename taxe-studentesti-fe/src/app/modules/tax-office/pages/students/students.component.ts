@@ -25,7 +25,7 @@ import StudentPaidFeesComponent from "@/app/modules/tax-office/components/studen
     'app-assign-study-fees': AssignStudyFeesComponent,
     'app-active-fees': StudentActiveFeesComponent,
     'app-paid-fees': StudentPaidFeesComponent
-  },
+  }
 })
 export default class StudentsComponent extends Vue {
 

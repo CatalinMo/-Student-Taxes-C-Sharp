@@ -7,7 +7,7 @@
       </button>
     </div>
     <div class="modal-body">
-      <form checkPassword = "accountForm">
+      <form ref="accountFormReference">
         <label style="margin-top: 2%">Parolă nouă<span style="color: red">*</span></label>
         <input type="password" class="form-control" v-model="accountForm.newPassword" placeholder="Parolă nouă" required pattern="(?=\D*\d)(?=[^a-z]*[a-z])(?=[^A-Z]*[A-Z]).{8,30}">
         <label style="margin-top: 2%">Repetare parolă nouă<span style="color: red">*</span></label>
@@ -15,7 +15,7 @@
       </form>
     </div>
     <div class="modal-footer">
-      <button :disabled="!$refs.accountForm?.validate()" type="button" class="btn btn-outline-primary" @click="showChangePasswordModal = false; changeAccountPassword(); resetForms()">Salvare</button>
+      <button :disabled="!areValidPasswords()" type="button" class="btn btn-outline-primary" @click="showChangePasswordModal = false; changeAccountPassword(); resetForms()">Salvare</button>
     </div>
   </b-modal>
 </div>
