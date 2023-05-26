@@ -31,15 +31,15 @@ export class HostelFeeServiceRepository {
   }
 
   createHostelFee(hostelFeeRequest: HostelFeeRequest) {
-    return axios.post(this.endpoints.createHostelFee(), hostelFeeRequest, httpOptions);
+    return from(axios.post(this.endpoints.createHostelFee(), hostelFeeRequest, httpOptions));
   }
 
   updateHostelFee(id: number, hostelFeeRequest: HostelFeeRequest) {
-    return axios.put(this.endpoints.updateHostelFee(id), hostelFeeRequest, httpOptions);
+    return from(axios.put(this.endpoints.updateHostelFee(id), hostelFeeRequest, httpOptions));
   }
 
   deleteHostelFee(id: number) {
-    return axios.delete(this.endpoints.deleteHostelFee(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteHostelFee(id), httpOptions));
   }
 
   getHostelFees(): Observable<Array<HostelFeeModel>> {

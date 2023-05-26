@@ -30,11 +30,11 @@ export class StudyFeeServiceRepository {
   }
 
   updateStudyFee(id: number, study: StudyFeeRequest) {
-    return axios.put(this.endpoints.updateStudyFee(id), study, httpOptions);
+    return from(axios.put(this.endpoints.updateStudyFee(id), study, httpOptions));
   }
 
   deleteStudyFee(id: number) {
-    return axios.delete(this.endpoints.deleteStudyFee(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteStudyFee(id), httpOptions));
   }
 
   getStudyFees(): Observable<Array<StudyFeeModel>> {

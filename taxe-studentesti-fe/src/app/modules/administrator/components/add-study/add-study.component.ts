@@ -1,57 +1,49 @@
-import { Component, OnInit, PipeTransform } from '@angular/core';
-import { Observable } from "rxjs";
-import { FormControl, FormGroup } from "@angular/forms";
-import { DecimalPipe } from "@angular/common";
-import {combineLatest, map, startWith, switchMap} from "rxjs/operators";
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { StudyModel } from "../../../../shared/models/study.model";
-import {StudyServiceRepository} from "../../../../shared/services/study.service.repository";
+import { Observable, combineLatest } from "rxjs";
+import {map} from "rxjs/operators";
+import { StudyModel } from "@/app/shared/models/study.model";
+import {StudyServiceRepository} from "@/app/shared/services/study.service.repository";
 import {AdministratorService} from "../../service/administrator.service";
-import {ActiveStudyRequest} from "../../../../shared/models/request/active-study.request";
-import {AccountServiceRepository} from "../../../../shared/services/account.service.repository";
+import {ActiveStudyRequest} from "@/app/shared/models/request/active-study.request";
+import {AccountServiceRepository} from "@/app/shared/services/account.service.repository";
+import {Vue} from "vue-class-component";
+import {inject} from "vue";
 
-@Component({
-  selector: 'app-add-study',
-  templateUrl: './add-study.component.html',
-  styleUrls: ['./add-study.component.scss']
-})
-export class AddStudyComponent implements OnInit {
+export default class AddStudyComponent extends Vue {
   initialStudies$: Observable<StudyModel[]>;
-  filteredStudiesByCycle$: Observable<StudyModel[]>;
-  filteredStudies$: Observable<StudyModel[]>;
-  filter = new FormControl('');
-  cycle = new FormControl('licenta');
-  studyForm = new FormGroup({
-    hostel: new FormControl(''),
-    budget: new FormControl('')
-  });
+  filteredStudiesByCycle: StudyModel[] = [];
+  filteredStudies: StudyModel[] = [];
+  showAddStudyModal = false;
+  filter = '';
+  cycle = 'licenta';
+  studyForm = {
+    hostel: '',
+    budget: false
+  };
   selectedStudy: StudyModel;
+  private accountServiceRepository: AccountServiceRepository = inject<AccountServiceRepository>('accountService');
+  private studyServiceRepository: StudyServiceRepository = inject<StudyServiceRepository>('studyService');
+  private administratorService: AdministratorService = inject<AdministratorService>('administratorService');
 
-  constructor(
-    private accountServiceRepository: AccountServiceRepository,
-    private studyServiceRepository: StudyServiceRepository,
-    private administratorService: AdministratorService,
-    private modalService: NgbModal,
-    private pipe: DecimalPipe
-  )
-  {
+  created() {
     this.getStudies();
+    this.prepareInitialFilteredData();
     this.filterStudiesByCycle();
-    this.filterStudies(pipe);
+    this.filterStudies();
   }
 
-  ngOnInit(): void {}
-
-  open(content: any) {
-    this.modalService.open(content, {centered: true}).result.then(() => {}, () => {this.studyForm.reset()});
+  resetForms() {
+    this.studyForm = {
+      hostel: '',
+      budget: false
+    };
   }
 
   setSelectedStudy(study: StudyModel) {
     this.selectedStudy = study;
   }
 
-  addStudyToAccount(formValue) {
-    const study = this.convertToActiveStudy(formValue);
+  addStudyToAccount() {
+    const study = this.convertToActiveStudy();
     let selectedAccount = this.administratorService.getAccountRequest();
     selectedAccount.activeStudies.push(study);
     this.accountServiceRepository.updateAccount(this.administratorService.getAccountId(), selectedAccount).subscribe();
@@ -62,30 +54,37 @@ export class AddStudyComponent implements OnInit {
     this.initialStudies$ = this.studyServiceRepository.getStudies();
   }
 
+  private prepareInitialFilteredData() {
+    combineLatest([
+      this.searchByCycle(this.cycle)
+    ]).subscribe(([studiesByCycle]) => {
+      this.filteredStudies = studiesByCycle;
+    });
+  }
+
   private filterStudiesByCycle() {
-    this.filteredStudiesByCycle$ = this.cycle.valueChanges.pipe(
-      startWith('licenta'),
-      switchMap(text => this.searchByCycle(text))
-    );
+    this.$watch('cycle', (text: string) => {
+      this.searchByCycle(text).subscribe(result => {
+        this.filteredStudiesByCycle = result;
+        this.filteredStudies = this.filteredStudiesByCycle;
+      });
+    });
   }
 
-  private filterStudies(pipe: any) {
-    this.filteredStudies$ = this.filter.valueChanges.pipe(
-      startWith(''),
-      combineLatest(this.filteredStudiesByCycle$, (filterValue, items) => {
-        return this.search(filterValue, items, pipe);
-      })
-    );
+  private filterStudies() {
+    this.$watch('filter', (filterValue) => {
+      this.filteredStudies = this.search(filterValue, this.filteredStudiesByCycle);
+    });
   }
 
-  private search(text: string, list: Array<StudyModel>, pipe: PipeTransform): StudyModel[] {
+  private search(text: string, list: Array<StudyModel>): StudyModel[] {
     return list.filter(study => {
       const term = text.toLowerCase();
       return study.faculty && study.faculty.toLowerCase().includes(term)
         || study.department && study.department.toLowerCase().includes(term)
         || study.studyProgram && study.studyProgram.toLowerCase().includes(term)
         || study.form && study.form.toLowerCase().includes(term)
-        || study.year && pipe.transform(study.year).includes(term)
+        || study.year && this.formatValue(study.year).includes(term)
         || study.abbreviation && study.abbreviation.toLowerCase().includes(term);
     });
   }
@@ -98,7 +97,11 @@ export class AddStudyComponent implements OnInit {
     })));
   }
 
-  private convertToActiveStudy(formValue): ActiveStudyRequest {
+  private formatValue(year: number): string {
+    return year.toString();
+  }
+
+  private convertToActiveStudy(): ActiveStudyRequest {
     let newActiveStudy = new ActiveStudyRequest();
     newActiveStudy.faculty = this.selectedStudy.faculty;
     newActiveStudy.cycle = this.selectedStudy.cycle;
@@ -107,8 +110,8 @@ export class AddStudyComponent implements OnInit {
     newActiveStudy.form = this.selectedStudy.form;
     newActiveStudy.year = this.selectedStudy.year;
     newActiveStudy.abbreviation = this.selectedStudy.abbreviation;
-    newActiveStudy.budget = formValue.budget;
-    newActiveStudy.accommodated = formValue.hostel;
+    newActiveStudy.budget = this.studyForm.budget;
+    newActiveStudy.accommodated = this.studyForm.hostel;
     return newActiveStudy;
   }
 }

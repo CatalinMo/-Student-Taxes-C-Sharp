@@ -32,19 +32,19 @@ export class StudyServiceRepository {
   }
 
   createStudy(study: StudyRequest) {
-    return axios.post(this.endpoints.createStudy(), study, httpOptions);
+    return from(axios.post(this.endpoints.createStudy(), study, httpOptions));
   }
 
   updateStudy(id: number, study: StudyRequest) {
-    return axios.put(this.endpoints.updateStudy(id), study, httpOptions);
+    return from(axios.put(this.endpoints.updateStudy(id), study, httpOptions));
   }
 
   deleteStudy(id: number) {
-    return axios.delete(this.endpoints.deleteStudy(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteStudy(id), httpOptions));
   }
 
   deleteActiveStudy(id: number) {
-    return axios.delete(this.endpoints.deleteActiveStudy(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteActiveStudy(id), httpOptions));
   }
 
   getStudies(): Observable<Array<StudyModel>> {

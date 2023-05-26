@@ -31,15 +31,15 @@ export class OtherFeeServiceRepository {
   }
 
   createOtherFee(otherFeeRequest: OtherFeeRequest) {
-    return axios.post(this.endpoints.createOtherFee(), otherFeeRequest, httpOptions);
+    return from(axios.post(this.endpoints.createOtherFee(), otherFeeRequest, httpOptions));
   }
 
   updateOtherFee(id: number, otherFeeRequest: OtherFeeRequest) {
-    return axios.put(this.endpoints.updateOtherFee(id), otherFeeRequest, httpOptions);
+    return from(axios.put(this.endpoints.updateOtherFee(id), otherFeeRequest, httpOptions));
   }
 
   deleteOtherFee(id: number) {
-    return axios.delete(this.endpoints.deleteOtherFee(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteOtherFee(id), httpOptions));
   }
 
   getOtherFees(): Observable<Array<OtherFeeModel>> {

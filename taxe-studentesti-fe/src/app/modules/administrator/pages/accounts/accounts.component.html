@@ -3,117 +3,119 @@
     <div class="col-md-6">
       <form>
         <div class="form-group form-inline">
-        Caută: <input class="form-control ml-2" type="text" [formControl]="filter"/>
+        Caută: <input class="form-control ml-2" type="text" v-model="filter"/>
         </div>
       </form>
     </div>
     <div class="col-md-6" style="text-align: right">
-      <button type="button" class="btn add-button" (click)="open(addAccount, false)">
+      <button type="button" class="btn add-button" @click="showAddAccountModal = true">
         <i class="fa fa-plus"></i>
       </button>
     </div>
   </div>
 
-  <ng-template #addAccount let-modal>
+  <b-modal id="add-account" centered v-model="showAddAccountModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-add-title">Adăugare Cont</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showAddAccountModal = false; resetForms()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
-      <form [formGroup]="accountForm">
+      <form ref="accountFormReference">
         <label style="margin-top: 2%">Nume<span style="color: red">*</span></label>
-        <input class="form-control" formControlName="lastName" placeholder="Nume">
+        <input class="form-control" v-model="accountForm.lastName" placeholder="Nume">
         <label style="margin-top: 2%">Prenume<span style="color: red">*</span></label>
-        <input class="form-control" formControlName="firstName" placeholder="Prenume">
+        <input class="form-control" v-model="accountForm.firstName" placeholder="Prenume">
         <label style="margin-top: 2%">CNP<span style="color: red">*</span></label>
-        <input class="form-control" formControlName="cnp" placeholder="CNP">
+        <input class="form-control" v-model="accountForm.cnp" placeholder="CNP" required pattern="[0-9]+" minlength="13" maxlength="13">
         <label style="margin-top: 2%">Email<span style="color: red">*</span></label>
-        <input class="form-control" formControlName="email" placeholder="Email">
+        <input class="form-control" v-model="accountForm.email" placeholder="Email" type="email" required>
         <label style="margin-top: 2%">Telefon<span style="color: red">*</span></label>
-        <input class="form-control" formControlName="phone" placeholder="Telefon">
+        <input class="form-control" v-model="accountForm.phone" placeholder="Telefon" required pattern="[0-9]+">
       </form>
     </div>
     <div class="modal-footer">
-      <button [disabled]="accountForm.invalid" type="button" class="btn btn-outline-primary" (click)="modal.close(); createAccount(accountForm.value)">Salvare</button>
+      <button :disabled="!$refs.accountFormReference?.checkValidity()" type="button" class="btn btn-outline-primary" @click="showAddAccountModal = false; createAccount(); resetForms()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #editAccount let-modal>
+  <b-modal id="edit-account" centered v-model="showEditAccountModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-edit-title">Editare Cont</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showEditAccountModal = false; resetForms()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
-      <form [formGroup]="accountForm">
-        <label style="margin-top: 2%">Nume</label>
-        <input class="form-control" formControlName="lastName" placeholder="Nume">
-        <label style="margin-top: 2%">Prenume</label>
-        <input class="form-control" formControlName="firstName" placeholder="Prenume">
-        <label style="margin-top: 2%">CNP</label>
-        <input class="form-control" formControlName="cnp" placeholder="CNP">
-        <label style="margin-top: 2%">Email</label>
-        <input class="form-control" formControlName="email" placeholder="Email">
-        <label style="margin-top: 2%">Telefon</label>
-        <input class="form-control" formControlName="phone" placeholder="Telefon">
+      <form ref="accountFormReference">
+          <label style="margin-top: 2%">Nume<span style="color: red">*</span></label>
+          <input class="form-control" v-model="accountForm.lastName" placeholder="Nume">
+          <label style="margin-top: 2%">Prenume<span style="color: red">*</span></label>
+          <input class="form-control" v-model="accountForm.firstName" placeholder="Prenume">
+          <div v-if="accountForm.cnp">
+          <label style="margin-top: 2%">CNP<span style="color: red">*</span></label>
+          <input class="form-control" v-model="accountForm.cnp" placeholder="CNP" required pattern="[0-9]+" minlength="13" maxlength="13">
+          </div>
+          <label style="margin-top: 2%">Email<span style="color: red">*</span></label>
+          <input class="form-control" v-model="accountForm.email" placeholder="Email" type="email" required>
+          <label style="margin-top: 2%">Telefon<span style="color: red">*</span></label>
+          <input class="form-control" v-model="accountForm.phone" placeholder="Telefon" required pattern="[0-9]+">
       </form>
     </div>
     <div class="modal-footer">
-      <button [disabled]="accountForm.invalid" type="button" class="btn btn-outline-primary" (click)="modal.close(); updateAccount(accountForm.value)">Salvare</button>
+      <button :disabled="!$refs.accountFormReference?.checkValidity()" type="button" class="btn btn-outline-primary" @click="showEditAccountModal = false; updateAccount(); resetForms()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #changePassword let-modal>
+  <b-modal id="change-password" centered v-model="showChangePasswordModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-change-title">Schimbare parolă</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showChangePasswordModal = false; resetForms()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
-      <form [formGroup]="changePasswordForm">
+      <form ref="changePasswordFormReference">
         <label style="margin-top: 2%">Parolă nouă<span style="color: red">*</span></label>
-        <input type="password" class="form-control" formControlName="newPassword" placeholder="Parolă nouă">
+        <input type="password" class="form-control" v-model="changePasswordForm.newPassword" placeholder="Parolă nouă" required pattern="(?=\D*\d)(?=[^a-z]*[a-z])(?=[^A-Z]*[A-Z]).{8,30}">
         <label style="margin-top: 2%">Repetare parolă nouă<span style="color: red">*</span></label>
-        <input type="password" class="form-control" formControlName="secondNewPassword" placeholder="Repetare parolă nouă">
+        <input type="password" class="form-control" v-model="changePasswordForm.secondNewPassword" placeholder="Repetare parolă nouă" required pattern="(?=\D*\d)(?=[^a-z]*[a-z])(?=[^A-Z]*[A-Z]).{8,30}">
       </form>
     </div>
     <div class="modal-footer">
-      <button [disabled]="changePasswordForm.invalid" type="button" class="btn btn-outline-primary" (click)="modal.close(); changeAccountPassword(changePasswordForm.value)">Salvare</button>
+      <button :disabled="!areValidPasswords()" type="button" class="btn btn-outline-primary" @click="showChangePasswordModal = false; changeAccountPassword(); resetForms()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #addStudy let-modal>
+  <b-modal id="add-study" centered size="xl" v-model="showAddStudyModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-add-study-title">Adăugare Studiu</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showAddStudyModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
       <app-add-study></app-add-study>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #activeStudy let-modal>
+  <b-modal id="active-study" centered size="xl" v-model="showActiveStudyModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-delete-study-title">Studii Active</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showActiveStudyModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" v-if="showActiveStudyModal">
       <app-active-study></app-active-study>
     </div>
-  </ng-template>
+  </b-modal>
 
-  <ng-template #deleteAccount let-modal>
+  <b-modal id="delete-account" centered v-model="showDeleteAccountModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-delete-title">Ștergere Cont</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showDeleteAccountModal = false">
         <i class="fa fa-times"></i>
       </button>
     </div>
@@ -123,10 +125,10 @@
         <span class="text-danger">Această operațiune nu poate fi anulată.</span></p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Anulare</button>
-      <button type="button" ngbAutofocus class="btn btn-danger" (click)="modal.close(); deleteAccountById()">Da</button>
+      <button type="button" class="btn btn-outline-secondary" @click="showDeleteAccountModal = false">Anulare</button>
+      <button type="button" autofocus class="btn btn-danger" @click="showDeleteAccountModal = false; deleteAccountById()">Da</button>
     </div>
-  </ng-template>
+  </b-modal>
 
 <table class="table table-striped">
   <thead>
@@ -141,14 +143,14 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let account of filteredAccounts$ | async">
+  <tr v-for="account in filteredAccounts">
     <td class="align-middle">{{account.lastName}}</td>
     <td class="align-middle">{{account.firstName}}</td>
     <td class="align-middle">{{account.cnp}}</td>
     <td class="align-middle">{{account.email}}</td>
     <td class="align-middle">{{account.phone}}</td>
     <td class="align-middle">
-      <p  *ngFor="let study of account.activeStudies">{{study.abbreviation}}</p>
+      <p  v-for="study in account.activeStudies">{{study.abbreviation}}</p>
     </td>
     <td>
       <div class="dropdown">
@@ -156,11 +158,11 @@
           <i class="fa fa-ellipsis-h" style="color: dodgerblue"></i>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" (click)="open(editAccount, false); setId(account.id); setForm(account)">Editează cont</a>
-          <a class="dropdown-item" (click)="open(changePassword, false); setId(account.id)">Schimbare parolă</a>
-          <a *ngIf="account.lastName != 'Taxe Studentesti'" class="dropdown-item" (click)="open(addStudy, true); setAccountId(account.id); setAccountRequest(account)">Adăugare studiu</a>
-          <a *ngIf="account.lastName != 'Taxe Studentesti'" class="dropdown-item" (click)="open(activeStudy, true); setAccount(account)">Studii active</a>
-          <a *ngIf="account.lastName != 'Taxe Studentesti'" class="dropdown-item" (click)="open(deleteAccount, false); setId(account.id)">Șterge cont</a>
+          <a class="dropdown-item" @click="showEditAccountModal = true; setId(account.id); setForm(account)">Editează cont</a>
+          <a class="dropdown-item" @click="showChangePasswordModal = true; setId(account.id)">Schimbare parolă</a>
+          <a class="dropdown-item" @click="showAddStudyModal = true; setAccountId(account.id); setAccountRequest(account)">Adăugare studiu</a>
+          <a class="dropdown-item" @click="showActiveStudyModal = true; setAccount(account)">Studii active</a>
+          <a class="dropdown-item" @click="showDeleteAccountModal = true; setId(account.id)">Șterge cont</a>
         </div>
       </div>
     </td>

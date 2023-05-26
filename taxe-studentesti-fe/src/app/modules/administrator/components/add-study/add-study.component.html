@@ -3,7 +3,7 @@
     <div class="col-md-6">
       <form>
         <div class="form-group">
-          Caută: <input class="form-control" type="text" [formControl]="filter"/>
+          Caută: <input class="form-control" type="text" v-model="filter"/>
         </div>
       </form>
     </div>
@@ -11,7 +11,7 @@
       <form>
         <div class="form-group">
           Ciclu:
-          <select class="form-control" [formControl]="cycle">
+          <select class="form-control" v-model="cycle">
             <option>licenta</option>
             <option>master</option>
             <option>postuniversitar</option>
@@ -22,17 +22,17 @@
     </div>
   </div>
 
-  <ng-template #addStudy let-modal>
+  <b-modal id="add-study" centered v-model="showAddStudyModal" hide-footer="true" hide-header="true">
     <div class="modal-header">
       <h4 class="modal-title" id="modal-add-title">Adaugă Studiu</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <button type="button" class="close" aria-label="Close" @click="showAddStudyModal = false; resetForms()">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="modal-body">
-      <form [formGroup]="studyForm">
+      <form>
         <label style="margin-top: 2%">Cămin</label>
-        <select class="form-control" formControlName="hostel">
+        <select class="form-control" v-model="studyForm.hostel">
           <option></option>
           <option>C1</option>
           <option>C2</option>
@@ -41,14 +41,14 @@
         </select>
         <div style="margin-top: 3%">
           <label class="form-check-label" style="margin-right: 7%">Buget</label>
-          <input class="form-check-input" type="checkbox" formControlName="budget"/>
+          <input class="form-check-input" type="checkbox" v-model="studyForm.budget"/>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-outline-primary" (click)="modal.close(); addStudyToAccount(studyForm.value)">Salvare</button>
+      <button type="button" class="btn btn-outline-primary" @click="showAddStudyModal = false; addStudyToAccount(); resetForms()">Salvare</button>
     </div>
-  </ng-template>
+  </b-modal>
 
   <div class="table-wrapper-scroll-y my-custom-scrollbar">
   <table class="table table-striped">
@@ -65,7 +65,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let study of filteredStudies$ | async">
+  <tr v-for="study in filteredStudies">
     <td class="align-middle">{{study.cycle}}</td>
     <td class="align-middle">{{study.faculty}}</td>
     <td class="align-middle">{{study.department}}</td>
@@ -73,7 +73,7 @@
     <td class="align-middle">{{study.form}}</td>
     <td class="align-middle">{{study.year}}</td>
     <td class="align-middle">{{study.abbreviation}}</td>
-    <td class="align-middle" style="text-align: right"><button type="button" class="btn btn-primary" (click)="open(addStudy); setSelectedStudy(study)">Adaugă</button></td>
+    <td class="align-middle" style="text-align: right"><button type="button" class="btn btn-primary" @click="showAddStudyModal = true; setSelectedStudy(study)">Adaugă</button></td>
   </tr>
   </tbody>
   </table>

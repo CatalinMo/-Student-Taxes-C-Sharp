@@ -43,7 +43,7 @@ export class AccountServiceRepository {
   }
 
   createAccount(account: AccountRequest) {
-    return axios.post(this.endpoints.createAccount(), account, httpOptions);
+    return from(axios.post(this.endpoints.createAccount(), account, httpOptions));
   }
 
   updateAccount(id: number, account: AccountRequest) {
@@ -76,7 +76,7 @@ export class AccountServiceRepository {
   }
 
   deleteAccount(id: number) {
-    return axios.delete(this.endpoints.deleteAccount(id), httpOptions);
+    return from(axios.delete(this.endpoints.deleteAccount(id), httpOptions));
   }
 
   deleteAccountActiveFee(id: number) {

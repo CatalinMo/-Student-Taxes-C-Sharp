@@ -6,7 +6,7 @@ import {inject} from "vue";
 
 export default class MainNavComponent extends Vue {
 
-  public user: UserViewModel;
+  user: UserViewModel;
   userRole = UserRole;
   private authorizationService: AuthorizationServiceRepository = inject<AuthorizationServiceRepository>('authorizationService');
 
