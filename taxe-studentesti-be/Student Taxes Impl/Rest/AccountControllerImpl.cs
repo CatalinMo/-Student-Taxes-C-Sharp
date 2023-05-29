@@ -66,7 +66,7 @@ namespace taxe_studentesti_be.student_taxes_impl.rest
         }
 
         [HttpGet("/student-taxes/accounts")]
-        [Authorize("Admin, Birou Taxe")]
+        [Authorize(Roles = "Admin, Birou Taxe")]
         public List<AccountResponseDto> GetAccounts()
         {
             return _accountService.GetAccounts();
