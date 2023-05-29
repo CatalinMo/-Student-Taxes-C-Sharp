@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
+using taxe_studentesti_be.Security_Api.Domain.Dto;
 using taxe_studentesti_be.Security_Impl.Application;
 using taxe_studentesti_be.Security_Impl.Config;
 using taxe_studentesti_be.Security_Impl.Config.Properties;
@@ -46,6 +47,10 @@ public class Program
         builder.Services.AddScoped<JwtSecurityTokenHandler>();
         builder.Services.AddScoped<TokenCacheService>();
         builder.Services.AddScoped<AuthorizationFilter>();
+        builder.Services.AddSingleton(provider =>
+        {
+            return new ConcurrentDictionary<string, TokenDetailsDto>();
+        });
 
         builder.Services.AddCors();
         builder.Services.AddAuthentication(options =>

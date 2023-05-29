@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using taxe_studentesti_be.Security_Api.Domain.Dto;
+using taxe_studentesti_be.Security_Api.exception;
 using taxe_studentesti_be.Security_Impl.Config.Properties;
 
 namespace taxe_studentesti_be.Security_Impl.Application
@@ -10,10 +11,10 @@ namespace taxe_studentesti_be.Security_Impl.Application
         private readonly JwtAuthProperties _jwtAuthProperties;
         private readonly ConcurrentDictionary<string, TokenDetailsDto> _tokens;
 
-        public TokenCacheService(IOptions<JwtAuthProperties> jwtOptions)
+        public TokenCacheService(IOptions<JwtAuthProperties> jwtOptions, ConcurrentDictionary<string, TokenDetailsDto> tokens)
         {
             _jwtAuthProperties = jwtOptions.Value;
-            _tokens = new ConcurrentDictionary<string, TokenDetailsDto>();
+            _tokens = tokens;
         }
 
         public void CleanUp()
@@ -52,7 +53,7 @@ namespace taxe_studentesti_be.Security_Impl.Application
             {
                 return new UserAuthentication(tokenDetails.Authentication);
             }
-            return null;
+            throw new AuthenticationFailException("Unauthorized");
         }
 
         private bool CheckTokenValidity(string token)

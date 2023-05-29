@@ -19,7 +19,7 @@ namespace taxe_studentesti_be.Security_Impl.Filter
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            string token = ExtractToken(context.HttpContext.Request);
+            string? token = ExtractToken(context.HttpContext.Request);
             if (token != null)
             {
                 FilterJwtToken(context.HttpContext, token);
@@ -58,7 +58,7 @@ namespace taxe_studentesti_be.Security_Impl.Filter
             context.User = principal;
         }
 
-        private string ExtractToken(HttpRequest request)
+        private string? ExtractToken(HttpRequest request)
         {
             string authHeader = request.Headers["Authorization"];
             if (authHeader != null && authHeader.StartsWith(BEARER_TOKEN))

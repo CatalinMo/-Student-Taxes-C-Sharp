@@ -23,16 +23,8 @@ namespace taxe_studentesti_be.Security_Impl.Config
             var actionContext = new ActionContext(Context, Context.GetRouteData(), new ActionDescriptor());
             var executingContext = new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object>(), null);
             _authorizationFilter.OnActionExecuting(executingContext);
-
-            if (executingContext.Result == null)
-            {
-                var ticket = new AuthenticationTicket(Context.User, Scheme.Name);
-                return await Task.FromResult(AuthenticateResult.Success(ticket));
-            }
-            else
-            {
-                return await Task.FromResult(AuthenticateResult.Fail("Authentication failed."));
-            }
+            var ticket = new AuthenticationTicket(Context.User, Scheme.Name);
+            return await Task.FromResult(AuthenticateResult.Success(ticket));
         }
     }
 }
