@@ -14,7 +14,14 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Infrastructure
 
         public void Save(OtherFeeEntity otherFeeEntity)
         {
-            _context.OtherFees.Add(otherFeeEntity);
+            if (otherFeeEntity.Id == 0)
+            {
+                _context.OtherFees.Add(otherFeeEntity);
+            }
+            else
+            {
+                _context.OtherFees.Update(otherFeeEntity);
+            }
             _context.SaveChanges();
         }
 

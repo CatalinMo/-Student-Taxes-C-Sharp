@@ -72,7 +72,8 @@ export class AccountServiceRepository {
   }
 
   changePassword(id: number, newPassword: string) {
-    return from(axios.put(this.endpoints.changePassword(id), newPassword));
+    const data = { newPassword: newPassword };
+    return from(axios.put(this.endpoints.changePassword(id), data));
   }
 
   deleteAccount(id: number) {

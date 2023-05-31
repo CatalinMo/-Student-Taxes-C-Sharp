@@ -173,9 +173,45 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Config
                 .ForMember(dest => dest.Cnp, opt => opt.MapFrom(src => src.Cnp))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone))
-                .ForMember(dest => dest.ActiveStudies, opt => opt.MapFrom(src => src.ActiveStudies))
-                .ForMember(dest => dest.ActiveFees, opt => opt.MapFrom(src => src.ActiveFees))
-                .ForMember(dest => dest.PaidFees, opt => opt.MapFrom(src => src.PaidFees));
+                .ForMember(dest => dest.ActiveStudies, opt => opt.MapFrom((src, dest, _, ctx) =>
+                {
+                    HashSet<ActiveStudyEntity> combinedList = new HashSet<ActiveStudyEntity>(dest.ActiveStudies);
+                    var mappedItems = src.ActiveStudies.Select(item => ctx.Mapper.Map<ActiveStudyRequestDto, ActiveStudyEntity>(item));
+                    foreach (var newItem in mappedItems)
+                    {
+                        if (!combinedList.Any(existingItem => ArePropertiesEqual(existingItem, newItem, "Id", "Account")))
+                        {
+                            combinedList.Add(newItem);
+                        }
+                    }
+                    return combinedList;
+                }))
+                .ForMember(dest => dest.ActiveFees, opt => opt.MapFrom((src, dest, _, ctx) =>
+                {
+                    HashSet<ActiveFeeEntity> combinedList = new HashSet<ActiveFeeEntity>(dest.ActiveFees);
+                    var mappedItems = src.ActiveFees.Select(item => ctx.Mapper.Map<ActiveFeeRequestDto, ActiveFeeEntity>(item));
+                    foreach (var newItem in mappedItems)
+                    {
+                        if (!combinedList.Any(existingItem => ArePropertiesEqual(existingItem, newItem, "Id", "Account")))
+                        {
+                            combinedList.Add(newItem);
+                        }
+                    }
+                    return combinedList;
+                }))
+                .ForMember(dest => dest.PaidFees, opt => opt.MapFrom((src, dest, _, ctx) =>
+                {
+                    HashSet<PaidFeeEntity> combinedList = new HashSet<PaidFeeEntity>(dest.PaidFees);
+                    var mappedItems = src.PaidFees.Select(item => ctx.Mapper.Map<PaidFeeRequestDto, PaidFeeEntity>(item));
+                    foreach (var newItem in mappedItems)
+                    {
+                        if (!combinedList.Any(existingItem => ArePropertiesEqual(existingItem, newItem, "Id", "Account")))
+                        {
+                            combinedList.Add(newItem);
+                        }
+                    }
+                    return combinedList;
+                }));
 
             CreateMap<ActiveStudyEntity, ActiveStudyResponseDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -226,7 +262,7 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Config
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => src.LimitDate))
+                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => new DateTimeOffset(src.LimitDate).ToUnixTimeMilliseconds()))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value))
                 .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
             CreateMap<ActiveFeeResponseDto, ActiveFeeEntity>()
@@ -234,7 +270,7 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Config
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => src.LimitDate))
+                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeMilliseconds(src.LimitDate).DateTime))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value))
                 .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
 
@@ -243,13 +279,13 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Config
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => src.LimitDate))
+                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => new DateTimeOffset(src.LimitDate).ToUnixTimeMilliseconds()))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
             CreateMap<ActiveFeeRequestDto, ActiveFeeEntity>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => src.LimitDate))
+                .ForMember(dest => dest.LimitDate, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeMilliseconds(src.LimitDate).DateTime))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
 
             CreateMap<PaidFeeEntity, PaidFeeResponseDto>()
@@ -257,28 +293,59 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Config
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => src.DateOfPayment))
+                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => new DateTimeOffset(src.DateOfPayment).ToUnixTimeMilliseconds()))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
             CreateMap<PaidFeeResponseDto, PaidFeeEntity>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => src.DateOfPayment))
+                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeMilliseconds(src.DateOfPayment).DateTime))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
 
             CreateMap<PaidFeeEntity, PaidFeeRequestDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => src.DateOfPayment))
+                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => new DateTimeOffset(src.DateOfPayment).ToUnixTimeMilliseconds()))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
             CreateMap<PaidFeeRequestDto, PaidFeeEntity>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.Details))
                 .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
-                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => src.DateOfPayment))
+                .ForMember(dest => dest.DateOfPayment, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeMilliseconds(src.DateOfPayment).DateTime))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
+        }
+
+        private bool ArePropertiesEqual<T>(T obj1, T obj2, params string[] excludedProperties)
+        {
+            var properties = typeof(T).GetProperties()
+                .Where(p => !excludedProperties.Contains(p.Name));
+
+            foreach (var property in properties)
+            {
+                var value1 = property.GetValue(obj1);
+                var value2 = property.GetValue(obj2);
+
+                if (value1 is DateTime && value2 is DateTime)
+                {
+                    var date1 = ((DateTime)value1).ToString("yyyy-MM-dd");
+                    var date2 = ((DateTime)value2).ToString("yyyy-MM-dd");
+
+                    if (!string.Equals(date1, date2))
+                    {
+                        return false;
+                    }
+                } else
+                {
+                    if (!Equals(value1, value2))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

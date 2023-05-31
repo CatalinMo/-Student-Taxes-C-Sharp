@@ -1,5 +1,6 @@
 ﻿using taxe_studentesti_be.student_taxes_api.domain.request;
 using taxe_studentesti_be.student_taxes_api.domain.response;
+using taxe_studentesti_be.Student_Taxes_Api.Domain.Request;
 
 namespace taxe_studentesti_be.student_taxes_api.rest
 {
@@ -15,7 +16,7 @@ namespace taxe_studentesti_be.student_taxes_api.rest
 
         void MarkFeeAsPaid(MarkFeeAsPaidRequestDto request);
 
-        void ChangePassword(long id, string newPassword);
+        void ChangePassword(long id, ChangePasswordRequestDto request);
 
         void DeleteAccount(long id);
 

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,7 +23,17 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile("Student Taxes App/Resources/appsettings.json");
 
-        builder.Services.AddDbContext<StudentTaxesContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("StudentTaxes")));
+        builder.Services.AddDbContext<StudentTaxesContext>(options =>
+        {
+            options.UseMySQL(builder.Configuration.GetConnectionString("StudentTaxes"));
+            options.UseLazyLoadingProxies();
+        });
+        builder.Services.Configure<KestrelServerOptions>(options =>
+        {
+            options.Limits.MaxRequestBodySize = 10485760;
+            options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(5);
+            options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
+        });
         builder.Services.AddAutoMapper(typeof(MappingConfig));
 
         builder.Services.Configure<UserProperties>(builder.Configuration.GetSection("User"));

@@ -7,12 +7,14 @@ C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\taxe-studentesti-be.pdb
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\AutoMapper.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Castle.Core.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Google.Protobuf.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\K4os.Compression.LZ4.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\K4os.Compression.LZ4.Streams.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\K4os.Hash.xxHash.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Proxies.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.Extensions.Caching.Abstractions.dll
 C:\Users\Catalin\Downloads\Faculta\Disertatie\Student-Taxes-C#\taxe-studentesti-be\bin\Debug\net6.0\Microsoft.Extensions.Caching.Memory.dll

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using taxe_studentesti_be.student_taxes_impl.model;
+﻿using taxe_studentesti_be.student_taxes_impl.model;
 using taxe_studentesti_be.student_taxes_impl.model.Context;
 
 namespace taxe_studentesti_be.Student_Taxes_Impl.Infrastructure
@@ -15,18 +14,24 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Infrastructure
 
         public ActiveFeeEntity? FindById(long id)
         {
-            return _context.ActiveFees.Include(activeFee => activeFee.Account)
-                .FirstOrDefault(activeFee => activeFee.Id == id);
+            return _context.ActiveFees.FirstOrDefault(activeFee => activeFee.Id == id);
         }
 
         public List<ActiveFeeEntity> FindAll()
         {
-            return _context.ActiveFees.Include(activeFee => activeFee.Account).ToList();
+            return _context.ActiveFees.ToList();
         }
 
         public void Save(ActiveFeeEntity activeFeeEntity)
         {
-            _context.ActiveFees.Add(activeFeeEntity);
+            if (activeFeeEntity.Id == 0)
+            {
+                _context.ActiveFees.Add(activeFeeEntity);
+            }
+            else
+            {
+                _context.ActiveFees.Update(activeFeeEntity);
+            }
             _context.SaveChanges();
         }
 

@@ -29,6 +29,6 @@ namespace taxe_studentesti_be.student_taxes_impl.model
 
         [ForeignKey("ACCOUNT_ID")]
         [JsonIgnore]
-        public AccountEntity? Account { get; set; }
+        public virtual AccountEntity? Account { get; set; }
     }
 }

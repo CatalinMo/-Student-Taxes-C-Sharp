@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace taxe_studentesti_be.student_taxes_impl.model
 {
@@ -27,6 +28,7 @@ namespace taxe_studentesti_be.student_taxes_impl.model
         public float Value { get; set; }
 
         [ForeignKey("ACCOUNT_ID")]
-        public AccountEntity? Account { get; set; }
+        [JsonIgnore]
+        public virtual AccountEntity? Account { get; set; }
     }
 }

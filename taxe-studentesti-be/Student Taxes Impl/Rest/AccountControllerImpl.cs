@@ -4,6 +4,7 @@ using taxe_studentesti_be.student_taxes_api.application;
 using taxe_studentesti_be.student_taxes_api.domain.request;
 using taxe_studentesti_be.student_taxes_api.domain.response;
 using taxe_studentesti_be.student_taxes_api.rest;
+using taxe_studentesti_be.Student_Taxes_Api.Domain.Request;
 
 namespace taxe_studentesti_be.student_taxes_impl.rest
 {
@@ -48,9 +49,9 @@ namespace taxe_studentesti_be.student_taxes_impl.rest
         }
 
         [HttpPut("/student-taxes/account/{id}/change-password")]
-        public void ChangePassword([FromRoute] long id, [FromBody] string newPassword)
+        public void ChangePassword([FromRoute] long id, [FromBody] ChangePasswordRequestDto request)
         {
-            _accountService.ChangePassword(id, newPassword);
+            _accountService.ChangePassword(id, request);
         }
 
         [HttpDelete("/student-taxes/account/{id}")]

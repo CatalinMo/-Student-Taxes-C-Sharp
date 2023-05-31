@@ -8,6 +8,7 @@ using taxe_studentesti_be.student_taxes_impl.model;
 using System.Text;
 using taxe_studentesti_be.student_taxes_api.exception;
 using Microsoft.Extensions.Options;
+using taxe_studentesti_be.Student_Taxes_Api.Domain.Request;
 
 namespace taxe_studentesti_be.Student_Taxes_Impl.Application
 {
@@ -44,7 +45,7 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Application
         public void UpdateAccount(long id, AccountRequestDto request)
         {
             AccountEntity accountEntity = _accountRepository.FindById(id) ?? throw new ArgumentNullException();
-            _mapper.Map(request, accountEntity);
+            _mapper.Map(request, accountEntity);  
             _accountRepository.Save(accountEntity);
         }
 
@@ -58,8 +59,18 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Application
         public void AssignFeeToAccounts(AssignFeeToAccountRequestDto request)
         {
             List<AccountEntity> accountEntities = _accountRepository.FindAllById(request.Ids);
-            ActiveFeeEntity activeFeeEntity = _mapper.Map<ActiveFeeEntity>(request.ActiveFee);
-            accountEntities.ForEach(accountEntity => accountEntity.ActiveFees.Add(activeFeeEntity));
+            accountEntities.ForEach(accountEntity =>
+            {
+                var activeFeeEntity = new ActiveFeeEntity
+                {
+                    Name = request.ActiveFee.Name,
+                    Details = request.ActiveFee.Details,
+                    Comment = request.ActiveFee.Comment,
+                    LimitDate = DateTimeOffset.FromUnixTimeMilliseconds(request.ActiveFee.LimitDate).DateTime,
+                    Value = request.ActiveFee.Value
+                };
+                accountEntity.ActiveFees.Add(activeFeeEntity);
+            });
             _accountRepository.SaveAll(accountEntities);
         }
 
@@ -68,14 +79,13 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Application
             _activeFeeRepository.DeleteById(request.ActiveFeeId);
             AccountEntity accountEntity = _accountRepository.FindById(request.AccountId) ?? throw new ArgumentNullException();
             _mapper.Map(request.AccountRequest, accountEntity);
-            accountEntity.ActiveFees = RemoveActiveFeeEntity(accountEntity.ActiveFees, request.ActiveFeeId);
             _accountRepository.Save(accountEntity);
         }
 
-        public void ChangePassword(long id, string newPassword)
+        public void ChangePassword(long id, ChangePasswordRequestDto request)
         {
             AccountEntity accountEntity = _accountRepository.FindById(id) ?? throw new ArgumentNullException();
-            accountEntity.Password = GetEncodedPassword(newPassword);
+            accountEntity.Password = GetEncodedPassword(request.NewPassword);
             _accountRepository.Save(accountEntity);
         }
 
@@ -140,12 +150,6 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Application
             return Encoding.UTF8.GetString(data);
         }
 
-        private HashSet<ActiveFeeEntity> RemoveActiveFeeEntity(HashSet<ActiveFeeEntity> activeFeeEntities, long paidFeeId)
-        {
-            return activeFeeEntities.Where(activeFeeEntity => !activeFeeEntity.Id.Equals(paidFeeId))
-                                    .ToHashSet();
-        }
-
         private List<AccountResponseDto> ConvertAccountToDto(List<AccountEntity> accountEntities)
         {
             return accountEntities.Select(ConvertAccount)
@@ -191,7 +195,7 @@ namespace taxe_studentesti_be.Student_Taxes_Impl.Application
                 Name = activeFeeEntity.Name,
                 Details = activeFeeEntity.Details,
                 Comment = activeFeeEntity.Comment,
-                LimitDate = activeFeeEntity.LimitDate,
+                LimitDate = new DateTimeOffset(activeFeeEntity.LimitDate).ToUnixTimeMilliseconds(),
                 Value = activeFeeEntity.Value,
                 Account = ConvertAccount(activeFeeEntity.Account),
             };
